@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="UTF-8">
+
+    <title>ALICE Example: Advanced Visualization</title>
+
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript"
+        src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+    <link href="/apis/fusiontables/docs/samples/style/default.css"
+        rel="stylesheet" type="text/css">
+    <style type="text/css">
+      #map-canvas {
+        width: auto;
+      }
+
+      #visualization {
+        float: right;
+      }
+
+      #legend {
+        background: #FFF;
+        margin: 10px;
+        padding: 5px;
+        width: 150px;
+      }
+
+      #legend p {
+        font-weight: bold;
+        margin-top: 3px;
+      }
+
+      #legend div {
+        clear: both;
+      }
+
+      .color {
+        height: 12px;
+        width: 12px;
+        margin-right: 3px;
+        float: left;
+        display: block;
+      }
+
+      .high {
+        color: #F00;
+      }
+
+      .medium {
+        color: #0F0;
+      }
+
+      .low {
+        color: #00F;
+      }
+
+      .high, .medium, .low {
+        font-weight: bold;
+      }
+    </style>
+
+    <script type="text/javascript">
+      google.load('visualization', '1', { packages: ['corechart'] });
+
+      /**
+       * Group type mapped to a style rule.
+       * @type {Object}
+       * @const
+       */
+      var LAYER_STYLES = {
+        'Poverty': {
+          'min': 0,
+          'max': 100,
+          'colors': [
+            '#f4cccc',
+            '#ea9999',
+            '#e06666',
+            '#cc0000',
+            '#990000'
+          ]
+        },
+        'ALICE': {
+          'min': 0,
+          'max': 100,
+          'colors': [
+            '#d0e0e3',
+            '#a2c4c9',
+            '#76a5af',
+            '#45818e',
+            '#134f5c'
+          ]
+        },
+        'Stable': {
+          'min': 0,
+          'max': 100,
+          'colors': [
+            '#d9d2e9',
+            '#b4a7d6',
+            '#8e7cc3',
+            '#674ea7',
+            '#351c75'
+          ]
+        }
+      }
+
+      function initialize() {
+        var Group = 'Poverty';
+
+        map = new google.maps.Map(document.getElementById('map-canvas'), {
+        center: new google.maps.LatLng(40.52276765213958, -74.76903048828126),
+        zoom: 8,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+          zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.SMALL
+          },
+        });
+
+        var layer = new google.maps.FusionTablesLayer();
+        updateLayerQuery(layer, Group);
+        layer.setMap(map);
+
+        createLegend(map, Group);
+        styleLayerByGroup(layer, Group);
+        styleMap(map);
+        drawVisualization(geometry);
+
+        google.maps.event.addListener(layer, 'click', function(e) {
+          var Sub-County = e.row['Sub-County'].value;
+          drawVisualization(geometry);
+
+        google.maps.event.addDomListener(document.getElementById('Group'),
+            'change', function() {
+              Group = this.value;
+              updateLayerQuery(layer, Group);
+              styleLayerByGroup(layer, Group);
+              updateLegend(Group);
+            });
+
+        google.maps.event.addDomListener(document.getElementById('Sub-County'),
+            'change', function() {
+              var Sub-County = this.value;
+              updateLayerQuery(layer, Group, Sub-County);
+              drawVisualization(geometry);
+            });
+      }
+
+      function updateLayerQuery(layer, Group, Sub-County) {
+        var where = "Group = '" + Group + "'";
+        if (Sub-County) {
+          where += " AND Sub-County = '" + Sub-County + "'";
+        }
+        layer.setOptions({
+          query: {
+            select: geometry,
+            from: '1AeEmnoL96Cp17_aeU3Y4LPGXHdENUSnfzhstpRE',
+            where: where
+          }
+        });
+      }
+
+      function createLegend(map, Group) {
+        var legendWrapper = document.createElement('div');
+        legendWrapper.id = 'legendWrapper';
+        legendWrapper.index = 1;
+        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(
+            legendWrapper);
+        legendContent(legendWrapper, Group);
+      }
+
+          var color = document.createElement('div');
+          color.setAttribute('class', 'color');
+          color.style.backgroundColor = colors[i];
+          legendItem.appendChild(color);
+
+          var newMin = minNum + step * i;
+          var newMax = newMin + step;
+          var minMax = document.createElement('span');
+          minMax.innerHTML = newMin + ' - ' + newMax;
+          legendItem.appendChild(minMax);
+
+          legend.appendChild(legendItem);
+        }
+
+        legendWrapper.appendChild(legend);
+      }
+
+      function updateLegend(Group) {
+        var legendWrapper = document.getElementById('legendWrapper');
+        var legend = document.getElementById('legend');
+        legendWrapper.removeChild(legend);
+        legendContent(legendWrapper, Group);
+      }
+
+      function styleLayerByGroup(layer, Group) {
+        var layerStyle = LAYER_STYLES[Group];
+        var colors = layerStyle.colors;
+        var minNum = layerStyle.min;
+        var maxNum = layerStyle.max;
+        var step = (maxNum - minNum) / colors.length;
+
+      function styleMap(map) {
+        var style = [{
+          featureType: 'all',
+          stylers: [{
+            saturation: -99
+          }]
+        }, {
+          featureType: 'poi',
+          stylers: [{
+            visibility: 'off'
+          }]
+        }, {
+          featureType: 'road',
+          stylers: [{
+            visibility: 'off'
+          }]
+        }];
+
+        var styledMapType = new google.maps.StyledMapType(style, {
+          map: map,
+          name: 'Styled Map'
+        });
+        map.mapTypes.set('map-style', styledMapType);
+        map.setMapTypeId('map-style');
+      }
+
+      function drawVisualization(geometry) {
+        google.visualization.drawChart({
+          containerId: "visualization",
+          dataSourceUrl: "http://www.google.com/fusiontables/gvizdata?tq=",
+          query: "SELECT Group,'2012' " +
+              "FROM 1AeEmnoL96Cp17_aeU3Y4LPGXHdENUSnfzhstpRE WHERE Sub-County = '" + Sub-County + "'",
+          chartType: "ColumnChart",
+          options: {
+            title: Sub-County,
+            height: 400,
+            width: 400
+          }
+        });
+      }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body>
+    <div id="visualization"></div>
+    <div id="map-canvas"></div>
+    <form>
+      <label>Group </label>
+      <select id="Group">
+        <option value="Poverty">Poverty</option>
+        <option value="ALICE">ALICE</option>
+        <option value="Stable">Stable</option>
+      </select>
+      <label>Sub-County</label>
+      <select id="Sub-County">
+        <option value="--Select--">--Select--</option>
+          <option value="Aberdeen township">Aberdeen township</option>
+          <option value="Absecon city">Absecon city</option>
+          <option value="Alexandria township">Alexandria township</option>
+          <option value="Allamuchy township">Allamuchy township</option>
+          <option value="Allendale borough">Allendale borough</option>
+          <option value="Allenhurst borough">Allenhurst borough</option>
+          <option value="Allentown borough">Allentown borough</option>
+          <option value="Alloway township">Alloway township</option>
+          <option value="Alpha borough">Alpha borough</option>
+          <option value="Alpine borough">Alpine borough</option>
+          <option value="Andover borough">Andover borough</option>
+          <option value="Andover township">Andover township</option>
+          <option value="Asbury Park city">Asbury Park city</option>
+          <option value="Atlantic City city">Atlantic City city</option>
+          <option value="Atlantic Highlands borough">Atlantic Highlands borough</option>
+          <option value="Audubon Park borough">Audubon Park borough</option>
+          <option value="Audubon borough">Audubon borough</option>
+          <option value="Avalon borough">Avalon borough</option>
+          <option value="Avon-by-the-Sea borough">Avon-by-the-Sea borough</option>
+          <option value="Barnegat Light borough">Barnegat Light borough</option>
+          <option value="Barnegat township">Barnegat township</option>
+          <option value="Barrington borough">Barrington borough</option>
+          <option value="Bass River township">Bass River township</option>
+          <option value="Bay Head borough">Bay Head borough</option>
+          <option value="Bayonne city">Bayonne city</option>
+          <option value="Beach Haven borough">Beach Haven borough</option>
+          <option value="Beachwood borough">Beachwood borough</option>
+          <option value="Bedminster township">Bedminster township</option>
+          <option value="Belleville township">Belleville township</option>
+          <option value="Bellmawr borough">Bellmawr borough</option>
+          <option value="Belmar borough">Belmar borough</option>
+          <option value="Belvidere town">Belvidere town</option>
+          <option value="Bergenfield borough">Bergenfield borough</option>
+          <option value="Berkeley Heights township">Berkeley Heights township</option>
+          <option value="Berkeley township">Berkeley township</option>
+          <option value="Berlin borough">Berlin borough</option>
+          <option value="Berlin township">Berlin township</option>
+          <option value="Bernards township">Bernards township</option>
+          <option value="Bernardsville borough">Bernardsville borough</option>
+          <option value="Bethlehem township">Bethlehem township</option>
+          <option value="Beverly city">Beverly city</option>
+          <option value="Blairstown township">Blairstown township</option>
+          <option value="Bloomfield township">Bloomfield township</option>
+          <option value="Bloomingdale borough">Bloomingdale borough</option>
+          <option value="Bloomsbury borough">Bloomsbury borough</option>
+          <option value="Bogota borough">Bogota borough</option>
+          <option value="Boonton town">Boonton town</option>
+          <option value="Boonton township">Boonton township</option>
+          <option value="Bordentown city">Bordentown city</option>
+          <option value="Bordentown township">Bordentown township</option>
+          <option value="Bound Brook borough">Bound Brook borough</option>
+          <option value="Bradley Beach borough">Bradley Beach borough</option>
+          <option value="Branchburg township">Branchburg township</option>
+          <option value="Branchville borough">Branchville borough</option>
+          <option value="Brick township">Brick township</option>
+          <option value="Bridgeton city">Bridgeton city</option>
+          <option value="Bridgewater township">Bridgewater township</option>
+          <option value="Brielle borough">Brielle borough</option>
+          <option value="Brigantine city">Brigantine city</option>
+          <option value="Brooklawn borough">Brooklawn borough</option>
+          <option value="Buena Vista township">Buena Vista township</option>
+          <option value="Buena borough">Buena borough</option>
+          <option value="Burlington city">Burlington city</option>
+          <option value="Burlington township">Burlington township</option>
+          <option value="Butler borough">Butler borough</option>
+          <option value="Byram township">Byram township</option>
+          <option value="Caldwell borough">Caldwell borough</option>
+          <option value="Califon borough">Califon borough</option>
+          <option value="Camden city">Camden city</option>
+          <option value="Cape May Point borough">Cape May Point borough</option>
+          <option value="Cape May city">Cape May city</option>
+          <option value="Carlstadt borough">Carlstadt borough</option>
+          <option value="Carneys Point township">Carneys Point township</option>
+          <option value="Carteret borough">Carteret borough</option>
+          <option value="Cedar Grove township">Cedar Grove township</option>
+          <option value="Chatham borough">Chatham borough</option>
+          <option value="Chatham township">Chatham township</option>
+          <option value="Cherry Hill township">Cherry Hill township</option>
+          <option value="Chesilhurst borough">Chesilhurst borough</option>
+          <option value="Chester borough">Chester borough</option>
+          <option value="Chester township">Chester township</option>
+          <option value="Chesterfield township">Chesterfield township</option>
+          <option value="Cinnaminson township">Cinnaminson township</option>
+          <option value="City of Orange township">City of Orange township</option>
+          <option value="Clark township">Clark township</option>
+          <option value="Clayton borough">Clayton borough</option>
+          <option value="Clementon borough">Clementon borough</option>
+          <option value="Cliffside Park borough">Cliffside Park borough</option>
+          <option value="Clifton city">Clifton city</option>
+          <option value="Clinton town">Clinton town</option>
+          <option value="Clinton township">Clinton township</option>
+          <option value="Closter borough">Closter borough</option>
+          <option value="Collingswood borough">Collingswood borough</option>
+          <option value="Colts Neck township">Colts Neck township</option>
+          <option value="Commercial township">Commercial township</option>
+          <option value="Corbin City city">Corbin City city</option>
+          <option value="County subdivisions not defined">County subdivisions not defined</option>
+          <option value="Cranbury township">Cranbury township</option>
+          <option value="Cranford township">Cranford township</option>
+          <option value="Cresskill borough">Cresskill borough</option>
+          <option value="Deal borough">Deal borough</option>
+          <option value="Deerfield township">Deerfield township</option>
+          <option value="Delanco township">Delanco township</option>
+          <option value="Delaware township">Delaware township</option>
+          <option value="Delran township">Delran township</option>
+          <option value="Demarest borough">Demarest borough</option>
+          <option value="Dennis township">Dennis township</option>
+          <option value="Denville township">Denville township</option>
+          <option value="Deptford township">Deptford township</option>
+          <option value="Dover town">Dover town</option>
+          <option value="Downe township">Downe township</option>
+          <option value="Dumont borough">Dumont borough</option>
+          <option value="Dunellen borough">Dunellen borough</option>
+          <option value="Eagleswood township">Eagleswood township</option>
+          <option value="East Amwell township">East Amwell township</option>
+          <option value="East Brunswick township">East Brunswick township</option>
+          <option value="East Greenwich township">East Greenwich township</option>
+          <option value="East Hanover township">East Hanover township</option>
+          <option value="East Newark borough">East Newark borough</option>
+          <option value="East Orange city">East Orange city</option>
+          <option value="East Rutherford borough">East Rutherford borough</option>
+          <option value="East Windsor township">East Windsor township</option>
+          <option value="Eastampton township">Eastampton township</option>
+          <option value="Eatontown borough">Eatontown borough</option>
+          <option value="Edgewater Park township">Edgewater Park township</option>
+          <option value="Edgewater borough">Edgewater borough</option>
+          <option value="Edison township">Edison township</option>
+          <option value="Egg Harbor City city">Egg Harbor City city</option>
+          <option value="Egg Harbor township">Egg Harbor township</option>
+          <option value="Elizabeth city">Elizabeth city</option>
+          <option value="Elk township">Elk township</option>
+          <option value="Elmer borough">Elmer borough</option>
+          <option value="Elmwood Park borough">Elmwood Park borough</option>
+          <option value="Elsinboro township">Elsinboro township</option>
+          <option value="Emerson borough">Emerson borough</option>
+          <option value="Englewood Cliffs borough">Englewood Cliffs borough</option>
+          <option value="Englewood city">Englewood city</option>
+          <option value="Englishtown borough">Englishtown borough</option>
+          <option value="Essex Fells borough">Essex Fells borough</option>
+          <option value="Estell Manor city">Estell Manor city</option>
+          <option value="Evesham township">Evesham township</option>
+          <option value="Ewing township">Ewing township</option>
+          <option value="Fair Haven borough">Fair Haven borough</option>
+          <option value="Fair Lawn borough">Fair Lawn borough</option>
+          <option value="Fairfield township">Fairfield township</option>
+          <option value="Fairview borough">Fairview borough</option>
+          <option value="Fanwood borough">Fanwood borough</option>
+          <option value="Far Hills borough">Far Hills borough</option>
+          <option value="Farmingdale borough">Farmingdale borough</option>
+          <option value="Fieldsboro borough">Fieldsboro borough</option>
+          <option value="Flemington borough">Flemington borough</option>
+          <option value="Florence township">Florence township</option>
+          <option value="Florham Park borough">Florham Park borough</option>
+          <option value="Folsom borough">Folsom borough</option>
+          <option value="Fort Lee borough">Fort Lee borough</option>
+          <option value="Frankford township">Frankford township</option>
+          <option value="Franklin Lakes borough">Franklin Lakes borough</option>
+          <option value="Franklin borough">Franklin borough</option>
+          <option value="Franklin township">Franklin township</option>
+          <option value="Fredon township">Fredon township</option>
+          <option value="Freehold borough">Freehold borough</option>
+          <option value="Freehold township">Freehold township</option>
+          <option value="Frelinghuysen township">Frelinghuysen township</option>
+          <option value="Frenchtown borough">Frenchtown borough</option>
+          <option value="Galloway township">Galloway township</option>
+          <option value="Garfield city">Garfield city</option>
+          <option value="Garwood borough">Garwood borough</option>
+          <option value="Gibbsboro borough">Gibbsboro borough</option>
+          <option value="Glassboro borough">Glassboro borough</option>
+          <option value="Glen Gardner borough">Glen Gardner borough</option>
+          <option value="Glen Ridge borough">Glen Ridge borough</option>
+          <option value="Glen Rock borough">Glen Rock borough</option>
+          <option value="Gloucester City city">Gloucester City city</option>
+          <option value="Gloucester township">Gloucester township</option>
+          <option value="Green Brook township">Green Brook township</option>
+          <option value="Green township">Green township</option>
+          <option value="Greenwich township">Greenwich township</option>
+          <option value="Guttenberg town">Guttenberg town</option>
+          <option value="Hackensack city">Hackensack city</option>
+          <option value="Hackettstown town">Hackettstown town</option>
+          <option value="Haddon Heights borough">Haddon Heights borough</option>
+          <option value="Haddon township">Haddon township</option>
+          <option value="Haddonfield borough">Haddonfield borough</option>
+          <option value="Hainesport township">Hainesport township</option>
+          <option value="Haledon borough">Haledon borough</option>
+          <option value="Hamburg borough">Hamburg borough</option>
+          <option value="Hamilton township">Hamilton township</option>
+          <option value="Hammonton town">Hammonton town</option>
+          <option value="Hampton borough">Hampton borough</option>
+          <option value="Hampton township">Hampton township</option>
+          <option value="Hanover township">Hanover township</option>
+          <option value="Harding township">Harding township</option>
+          <option value="Hardwick township">Hardwick township</option>
+          <option value="Hardyston township">Hardyston township</option>
+          <option value="Harmony township">Harmony township</option>
+          <option value="Harrington Park borough">Harrington Park borough</option>
+          <option value="Harrison town">Harrison town</option>
+          <option value="Harrison township">Harrison township</option>
+          <option value="Harvey Cedars borough">Harvey Cedars borough</option>
+          <option value="Hasbrouck Heights borough">Hasbrouck Heights borough</option>
+          <option value="Haworth borough">Haworth borough</option>
+          <option value="Hawthorne borough">Hawthorne borough</option>
+          <option value="Hazlet township">Hazlet township</option>
+          <option value="Helmetta borough">Helmetta borough</option>
+          <option value="Hi-Nella borough">Hi-Nella borough</option>
+          <option value="High Bridge borough">High Bridge borough</option>
+          <option value="Highland Park borough">Highland Park borough</option>
+          <option value="Highlands borough">Highlands borough</option>
+          <option value="Hightstown borough">Hightstown borough</option>
+          <option value="Hillsborough township">Hillsborough township</option>
+          <option value="Hillsdale borough">Hillsdale borough</option>
+          <option value="Hillside township">Hillside township</option>
+          <option value="Ho-Ho-Kus borough">Ho-Ho-Kus borough</option>
+          <option value="Hoboken city">Hoboken city</option>
+          <option value="Holland township">Holland township</option>
+          <option value="Holmdel township">Holmdel township</option>
+          <option value="Hopatcong borough">Hopatcong borough</option>
+          <option value="Hope township">Hope township</option>
+          <option value="Hopewell borough">Hopewell borough</option>
+          <option value="Hopewell township">Hopewell township</option>
+          <option value="Howell township">Howell township</option>
+          <option value="Independence township">Independence township</option>
+          <option value="Interlaken borough">Interlaken borough</option>
+          <option value="Irvington township">Irvington township</option>
+          <option value="Island Heights borough">Island Heights borough</option>
+          <option value="Jackson township">Jackson township</option>
+          <option value="Jamesburg borough">Jamesburg borough</option>
+          <option value="Jefferson township">Jefferson township</option>
+          <option value="Jersey City city">Jersey City city</option>
+          <option value="Keansburg borough">Keansburg borough</option>
+          <option value="Kearny town">Kearny town</option>
+          <option value="Kenilworth borough">Kenilworth borough</option>
+          <option value="Keyport borough">Keyport borough</option>
+          <option value="Kingwood township">Kingwood township</option>
+          <option value="Kinnelon borough">Kinnelon borough</option>
+          <option value="Knowlton township">Knowlton township</option>
+          <option value="Lacey township">Lacey township</option>
+          <option value="Lafayette township">Lafayette township</option>
+          <option value="Lake Como borough">Lake Como borough</option>
+          <option value="Lakehurst borough">Lakehurst borough</option>
+          <option value="Lakewood township">Lakewood township</option>
+          <option value="Lambertville city">Lambertville city</option>
+          <option value="Laurel Springs borough">Laurel Springs borough</option>
+          <option value="Lavallette borough">Lavallette borough</option>
+          <option value="Lawnside borough">Lawnside borough</option>
+          <option value="Lawrence township">Lawrence township</option>
+          <option value="Lebanon borough">Lebanon borough</option>
+          <option value="Lebanon township">Lebanon township</option>
+          <option value="Leonia borough">Leonia borough</option>
+          <option value="Liberty township">Liberty township</option>
+          <option value="Lincoln Park borough">Lincoln Park borough</option>
+          <option value="Linden city">Linden city</option>
+          <option value="Lindenwold borough">Lindenwold borough</option>
+          <option value="Linwood city">Linwood city</option>
+          <option value="Little Egg Harbor township">Little Egg Harbor township</option>
+          <option value="Little Falls township">Little Falls township</option>
+          <option value="Little Ferry borough">Little Ferry borough</option>
+          <option value="Little Silver borough">Little Silver borough</option>
+          <option value="Livingston township">Livingston township</option>
+          <option value="Loch Arbour village">Loch Arbour village</option>
+          <option value="Lodi borough">Lodi borough</option>
+          <option value="Logan township">Logan township</option>
+          <option value="Long Beach township">Long Beach township</option>
+          <option value="Long Branch city">Long Branch city</option>
+          <option value="Long Hill township">Long Hill township</option>
+          <option value="Longport borough">Longport borough</option>
+          <option value="Lopatcong township">Lopatcong township</option>
+          <option value="Lower Alloways Creek township">Lower Alloways Creek township</option>
+          <option value="Lower township">Lower township</option>
+          <option value="Lumberton township">Lumberton township</option>
+          <option value="Lyndhurst township">Lyndhurst township</option>
+          <option value="Madison borough">Madison borough</option>
+          <option value="Magnolia borough">Magnolia borough</option>
+          <option value="Mahwah township">Mahwah township</option>
+          <option value="Manalapan township">Manalapan township</option>
+          <option value="Manasquan borough">Manasquan borough</option>
+          <option value="Manchester township">Manchester township</option>
+          <option value="Mannington township">Mannington township</option>
+          <option value="Mansfield township">Mansfield township</option>
+          <option value="Mantoloking borough">Mantoloking borough</option>
+          <option value="Mantua township">Mantua township</option>
+          <option value="Manville borough">Manville borough</option>
+          <option value="Maple Shade township">Maple Shade township</option>
+          <option value="Maplewood township">Maplewood township</option>
+          <option value="Margate City city">Margate City city</option>
+          <option value="Marlboro township">Marlboro township</option>
+          <option value="Matawan borough">Matawan borough</option>
+          <option value="Maurice River township">Maurice River township</option>
+          <option value="Maywood borough">Maywood borough</option>
+          <option value="Medford Lakes borough">Medford Lakes borough</option>
+          <option value="Medford township">Medford township</option>
+          <option value="Mendham borough">Mendham borough</option>
+          <option value="Mendham township">Mendham township</option>
+          <option value="Merchantville borough">Merchantville borough</option>
+          <option value="Metuchen borough">Metuchen borough</option>
+          <option value="Middle township">Middle township</option>
+          <option value="Middlesex borough">Middlesex borough</option>
+          <option value="Middletown township">Middletown township</option>
+          <option value="Midland Park borough">Midland Park borough</option>
+          <option value="Milford borough">Milford borough</option>
+          <option value="Millburn township">Millburn township</option>
+          <option value="Millstone borough">Millstone borough</option>
+          <option value="Millstone township">Millstone township</option>
+          <option value="Milltown borough">Milltown borough</option>
+          <option value="Millville city">Millville city</option>
+          <option value="Mine Hill township">Mine Hill township</option>
+          <option value="Monmouth Beach borough">Monmouth Beach borough</option>
+          <option value="Monroe township">Monroe township</option>
+          <option value="Montague township">Montague township</option>
+          <option value="Montclair township">Montclair township</option>
+          <option value="Montgomery township">Montgomery township</option>
+          <option value="Montvale borough">Montvale borough</option>
+          <option value="Montville township">Montville township</option>
+          <option value="Moonachie borough">Moonachie borough</option>
+          <option value="Moorestown township">Moorestown township</option>
+          <option value="Morris Plains borough">Morris Plains borough</option>
+          <option value="Morris township">Morris township</option>
+          <option value="Morristown town">Morristown town</option>
+          <option value="Mount Arlington borough">Mount Arlington borough</option>
+          <option value="Mount Ephraim borough">Mount Ephraim borough</option>
+          <option value="Mount Holly township">Mount Holly township</option>
+          <option value="Mount Laurel township">Mount Laurel township</option>
+          <option value="Mount Olive township">Mount Olive township</option>
+          <option value="Mountain Lakes borough">Mountain Lakes borough</option>
+          <option value="Mountainside borough">Mountainside borough</option>
+          <option value="Mullica township">Mullica township</option>
+          <option value="National Park borough">National Park borough</option>
+          <option value="Neptune City borough">Neptune City borough</option>
+          <option value="Neptune township">Neptune township</option>
+          <option value="Netcong borough">Netcong borough</option>
+          <option value="New Brunswick city">New Brunswick city</option>
+          <option value="New Hanover township">New Hanover township</option>
+          <option value="New Milford borough">New Milford borough</option>
+          <option value="New Providence borough">New Providence borough</option>
+          <option value="Newark city">Newark city</option>
+          <option value="Newfield borough">Newfield borough</option>
+          <option value="Newton town">Newton town</option>
+          <option value="North Arlington borough">North Arlington borough</option>
+          <option value="North Bergen township">North Bergen township</option>
+          <option value="North Brunswick township">North Brunswick township</option>
+          <option value="North Caldwell borough">North Caldwell borough</option>
+          <option value="North Haledon borough">North Haledon borough</option>
+          <option value="North Hanover township">North Hanover township</option>
+          <option value="North Plainfield borough">North Plainfield borough</option>
+          <option value="North Wildwood city">North Wildwood city</option>
+          <option value="Northfield city">Northfield city</option>
+          <option value="Northvale borough">Northvale borough</option>
+          <option value="Norwood borough">Norwood borough</option>
+          <option value="Nutley township">Nutley township</option>
+          <option value="Oakland borough">Oakland borough</option>
+          <option value="Oaklyn borough">Oaklyn borough</option>
+          <option value="Ocean City city">Ocean City city</option>
+          <option value="Ocean Gate borough">Ocean Gate borough</option>
+          <option value="Ocean township">Ocean township</option>
+          <option value="Oceanport borough">Oceanport borough</option>
+          <option value="Ogdensburg borough">Ogdensburg borough</option>
+          <option value="Old Bridge township">Old Bridge township</option>
+          <option value="Old Tappan borough">Old Tappan borough</option>
+          <option value="Oldmans township">Oldmans township</option>
+          <option value="Oradell borough">Oradell borough</option>
+          <option value="Oxford township">Oxford township</option>
+          <option value="Palisades Park borough">Palisades Park borough</option>
+          <option value="Palmyra borough">Palmyra borough</option>
+          <option value="Paramus borough">Paramus borough</option>
+          <option value="Park Ridge borough">Park Ridge borough</option>
+          <option value="Parsippany-Troy Hills township">Parsippany-Troy Hills township</option>
+          <option value="Passaic city">Passaic city</option>
+          <option value="Paterson city">Paterson city</option>
+          <option value="Paulsboro borough">Paulsboro borough</option>
+          <option value="Peapack and Gladstone borough">Peapack and Gladstone borough</option>
+          <option value="Pemberton borough">Pemberton borough</option>
+          <option value="Pemberton township">Pemberton township</option>
+          <option value="Pennington borough">Pennington borough</option>
+          <option value="Penns Grove borough">Penns Grove borough</option>
+          <option value="Pennsauken township">Pennsauken township</option>
+          <option value="Pennsville township">Pennsville township</option>
+          <option value="Pequannock township">Pequannock township</option>
+          <option value="Perth Amboy city">Perth Amboy city</option>
+          <option value="Phillipsburg town">Phillipsburg town</option>
+          <option value="Pilesgrove township">Pilesgrove township</option>
+          <option value="Pine Beach borough">Pine Beach borough</option>
+          <option value="Pine Hill borough">Pine Hill borough</option>
+          <option value="Pine Valley borough">Pine Valley borough</option>
+          <option value="Piscataway township">Piscataway township</option>
+          <option value="Pitman borough">Pitman borough</option>
+          <option value="Pittsgrove township">Pittsgrove township</option>
+          <option value="Plainfield city">Plainfield city</option>
+          <option value="Plainsboro township">Plainsboro township</option>
+          <option value="Pleasantville city">Pleasantville city</option>
+          <option value="Plumsted township">Plumsted township</option>
+          <option value="Pohatcong township">Pohatcong township</option>
+          <option value="Point Pleasant Beach borough">Point Pleasant Beach borough</option>
+          <option value="Point Pleasant borough">Point Pleasant borough</option>
+          <option value="Pompton Lakes borough">Pompton Lakes borough</option>
+          <option value="Port Republic city">Port Republic city</option>
+          <option value="Princeton borough">Princeton borough</option>
+          <option value="Princeton township">Princeton township</option>
+          <option value="Prospect Park borough">Prospect Park borough</option>
+          <option value="Quinton township">Quinton township</option>
+          <option value="Rahway city">Rahway city</option>
+          <option value="Ramsey borough">Ramsey borough</option>
+          <option value="Randolph township">Randolph township</option>
+          <option value="Raritan borough">Raritan borough</option>
+          <option value="Raritan township">Raritan township</option>
+          <option value="Readington township">Readington township</option>
+          <option value="Red Bank borough">Red Bank borough</option>
+          <option value="Ridgefield Park village">Ridgefield Park village</option>
+          <option value="Ridgefield borough">Ridgefield borough</option>
+          <option value="Ridgewood village">Ridgewood village</option>
+          <option value="Ringwood borough">Ringwood borough</option>
+          <option value="River Edge borough">River Edge borough</option>
+          <option value="River Vale township">River Vale township</option>
+          <option value="Riverdale borough">Riverdale borough</option>
+          <option value="Riverside township">Riverside township</option>
+          <option value="Riverton borough">Riverton borough</option>
+          <option value="Robbinsville township">Robbinsville township</option>
+          <option value="Rochelle Park township">Rochelle Park township</option>
+          <option value="Rockaway borough">Rockaway borough</option>
+          <option value="Rockaway township">Rockaway township</option>
+          <option value="Rockleigh borough">Rockleigh borough</option>
+          <option value="Rocky Hill borough">Rocky Hill borough</option>
+          <option value="Roosevelt borough">Roosevelt borough</option>
+          <option value="Roseland borough">Roseland borough</option>
+          <option value="Roselle Park borough">Roselle Park borough</option>
+          <option value="Roselle borough">Roselle borough</option>
+          <option value="Roxbury township">Roxbury township</option>
+          <option value="Rumson borough">Rumson borough</option>
+          <option value="Runnemede borough">Runnemede borough</option>
+          <option value="Rutherford borough">Rutherford borough</option>
+          <option value="Saddle Brook township">Saddle Brook township</option>
+          <option value="Saddle River borough">Saddle River borough</option>
+          <option value="Salem city">Salem city</option>
+          <option value="Sandyston township">Sandyston township</option>
+          <option value="Sayreville borough">Sayreville borough</option>
+          <option value="Scotch Plains township">Scotch Plains township</option>
+          <option value="Sea Bright borough">Sea Bright borough</option>
+          <option value="Sea Girt borough">Sea Girt borough</option>
+          <option value="Sea Isle City city">Sea Isle City city</option>
+          <option value="Seaside Heights borough">Seaside Heights borough</option>
+          <option value="Seaside Park borough">Seaside Park borough</option>
+          <option value="Secaucus town">Secaucus town</option>
+          <option value="Shamong township">Shamong township</option>
+          <option value="Shiloh borough">Shiloh borough</option>
+          <option value="Ship Bottom borough">Ship Bottom borough</option>
+          <option value="Shrewsbury borough">Shrewsbury borough</option>
+          <option value="Shrewsbury township">Shrewsbury township</option>
+          <option value="Somerdale borough">Somerdale borough</option>
+          <option value="Somers Point city">Somers Point city</option>
+          <option value="Somerville borough">Somerville borough</option>
+          <option value="South Amboy city">South Amboy city</option>
+          <option value="South Bound Brook borough">South Bound Brook borough</option>
+          <option value="South Brunswick township">South Brunswick township</option>
+          <option value="South Hackensack township">South Hackensack township</option>
+          <option value="South Harrison township">South Harrison township</option>
+          <option value="South Orange Village township">South Orange Village township</option>
+          <option value="South Plainfield borough">South Plainfield borough</option>
+          <option value="South River borough">South River borough</option>
+          <option value="South Toms River borough">South Toms River borough</option>
+          <option value="Southampton township">Southampton township</option>
+          <option value="Sparta township">Sparta township</option>
+          <option value="Spotswood borough">Spotswood borough</option>
+          <option value="Spring Lake Heights borough">Spring Lake Heights borough</option>
+          <option value="Spring Lake borough">Spring Lake borough</option>
+          <option value="Springfield township">Springfield township</option>
+          <option value="Stafford township">Stafford township</option>
+          <option value="Stanhope borough">Stanhope borough</option>
+          <option value="Stillwater township">Stillwater township</option>
+          <option value="Stockton borough">Stockton borough</option>
+          <option value="Stone Harbor borough">Stone Harbor borough</option>
+          <option value="Stow Creek township">Stow Creek township</option>
+          <option value="Stratford borough">Stratford borough</option>
+          <option value="Summit city">Summit city</option>
+          <option value="Surf City borough">Surf City borough</option>
+          <option value="Sussex borough">Sussex borough</option>
+          <option value="Swedesboro borough">Swedesboro borough</option>
+          <option value="Tabernacle township">Tabernacle township</option>
+          <option value="Tavistock borough">Tavistock borough</option>
+          <option value="Teaneck township">Teaneck township</option>
+          <option value="Tenafly borough">Tenafly borough</option>
+          <option value="Teterboro borough">Teterboro borough</option>
+          <option value="Tewksbury township">Tewksbury township</option>
+          <option value="Tinton Falls borough">Tinton Falls borough</option>
+          <option value="Toms River township">Toms River township</option>
+          <option value="Totowa borough">Totowa borough</option>
+          <option value="Trenton city">Trenton city</option>
+          <option value="Tuckerton borough">Tuckerton borough</option>
+          <option value="Union Beach borough">Union Beach borough</option>
+          <option value="Union City city">Union City city</option>
+          <option value="Union township">Union township</option>
+          <option value="Upper Deerfield township">Upper Deerfield township</option>
+          <option value="Upper Freehold township">Upper Freehold township</option>
+          <option value="Upper Pittsgrove township">Upper Pittsgrove township</option>
+          <option value="Upper Saddle River borough">Upper Saddle River borough</option>
+          <option value="Upper township">Upper township</option>
+          <option value="Ventnor City city">Ventnor City city</option>
+          <option value="Vernon township">Vernon township</option>
+          <option value="Verona township">Verona township</option>
+          <option value="Victory Gardens borough">Victory Gardens borough</option>
+          <option value="Vineland city">Vineland city</option>
+          <option value="Voorhees township">Voorhees township</option>
+          <option value="Waldwick borough">Waldwick borough</option>
+          <option value="Wall township">Wall township</option>
+          <option value="Wallington borough">Wallington borough</option>
+          <option value="Walpack township">Walpack township</option>
+          <option value="Wanaque borough">Wanaque borough</option>
+          <option value="Wantage township">Wantage township</option>
+          <option value="Warren township">Warren township</option>
+          <option value="Washington borough">Washington borough</option>
+          <option value="Washington township">Washington township</option>
+          <option value="Watchung borough">Watchung borough</option>
+          <option value="Waterford township">Waterford township</option>
+          <option value="Wayne township">Wayne township</option>
+          <option value="Weehawken township">Weehawken township</option>
+          <option value="Wenonah borough">Wenonah borough</option>
+          <option value="West Amwell township">West Amwell township</option>
+          <option value="West Caldwell township">West Caldwell township</option>
+          <option value="West Cape May borough">West Cape May borough</option>
+          <option value="West Deptford township">West Deptford township</option>
+          <option value="West Long Branch borough">West Long Branch borough</option>
+          <option value="West Milford township">West Milford township</option>
+          <option value="West New York town">West New York town</option>
+          <option value="West Orange township">West Orange township</option>
+          <option value="West Wildwood borough">West Wildwood borough</option>
+          <option value="West Windsor township">West Windsor township</option>
+          <option value="Westampton township">Westampton township</option>
+          <option value="Westfield town">Westfield town</option>
+          <option value="Westville borough">Westville borough</option>
+          <option value="Westwood borough">Westwood borough</option>
+          <option value="Weymouth township">Weymouth township</option>
+          <option value="Wharton borough">Wharton borough</option>
+          <option value="White township">White township</option>
+          <option value="Wildwood Crest borough">Wildwood Crest borough</option>
+          <option value="Wildwood city">Wildwood city</option>
+          <option value="Willingboro township">Willingboro township</option>
+          <option value="Winfield township">Winfield township</option>
+          <option value="Winslow township">Winslow township</option>
+          <option value="Wood-Ridge borough">Wood-Ridge borough</option>
+          <option value="Woodbine borough">Woodbine borough</option>
+          <option value="Woodbridge township">Woodbridge township</option>
+          <option value="Woodbury Heights borough">Woodbury Heights borough</option>
+          <option value="Woodbury city">Woodbury city</option>
+          <option value="Woodcliff Lake borough">Woodcliff Lake borough</option>
+          <option value="Woodland Park borough">Woodland Park borough</option>
+          <option value="Woodland township">Woodland township</option>
+          <option value="Woodlynne borough">Woodlynne borough</option>
+          <option value="Woodstown borough">Woodstown borough</option>
+          <option value="Woolwich township">Woolwich township</option>
+          <option value="Wrightstown borough">Wrightstown borough</option>
+          <option value="Wyckoff township">Wyckoff township</option>
+      </select>
+    </form>
+  </body>
+</html>
