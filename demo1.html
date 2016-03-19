@@ -1,0 +1,217 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/> 
+ 
+<title>insert</title> 
+ 
+<style type="text/css">
+  html { height: 100% }
+  body { font-family: Arial, sans-serif; height: 100%; margin: 0; padding: 0 }
+  #map_canvas { height: 100% }
+  #checkboxes { 
+	position: absolute; 
+	top: 50px; 
+	right: 10px;
+	font-family: 'arial', 'sans-serif'; 
+	font-size: 14px;
+	background-color: white;
+	border: 1px solid black;
+	padding: 10px 10px 10px 10px;
+	}
+</style>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true"></script>
+<script type="text/javascript">
+  //Begin map parameters
+var map, layer_0, layer_1, layer_2, layer_3, layer_4, layer_5;
+
+var zoom = 5;
+var center = new google.maps.LatLng(42.12777261243836, -77.10434630468752);
+
+var infoWindow = new google.maps.InfoWindow();
+
+ google.maps.event.addListener(map, "click", function() { infoWindow.close(); });
+
+function openIW(FTevent) {
+  // infoWindow.setContent(FTevent.infoWindowHtml);
+  // infoWindow.setPosition(FTevent.latLng);
+  infoWindow.setOptions(
+    { 
+     content: FTevent.infoWindowHtml,
+     position: FTevent.latLng,
+     pixelOffset: FTevent.pixelOffset
+    });
+  infoWindow.open(map);
+}
+
+function initialize() {
+  map = new google.maps.Map(document.getElementById('map_canvas'), {
+    center: center,
+    zoom: zoom,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  });
+   //End map parameters
+      layer_0 = new google.maps.FusionTablesLayer({
+        query: {
+          select: "col11",
+          from: "1rMX6EwZYg8i_H0n28s9HNV0yHy5JtwBm672mGd2z"
+        },
+        map: map,
+        styleId: 2,
+        templateId: 2
+      });      
+      layer_1 = new google.maps.FusionTablesLayer({
+        query: {
+          select: "col11>>0",
+          from: "1-34Xc9ZV2zufGPHRbNzzUANI242a6S2OJa3GgbQD"
+        },
+        map: map,
+        styleId: 2,
+        templateId: 2
+      });
+      layer_2 = new google.maps.FusionTablesLayer({
+        query: {
+          select: "col11>>0",
+          from: "1-34Xc9ZV2zufGPHRbNzzUANI242a6S2OJa3GgbQD"
+        },
+        map: map,
+        styleId: 3,
+        templateId: 3
+      });
+      layer_3 = new google.maps.FusionTablesLayer({
+        query: {
+          select: "col11>>0",
+          from: "1-34Xc9ZV2zufGPHRbNzzUANI242a6S2OJa3GgbQD"
+        },
+        map: map,
+        styleId: 4,
+        templateId: 4
+      });
+      layer_4 = new google.maps.FusionTablesLayer({
+        query: {
+          select: "col11>>0",
+          from: "1-34Xc9ZV2zufGPHRbNzzUANI242a6S2OJa3GgbQD"
+        },
+        map: map,
+        styleId: 5,
+        templateId: 5
+      });
+      layer_5 = new google.maps.FusionTablesLayer({
+        query: {
+          select: "col11>>0",
+          from: "1-34Xc9ZV2zufGPHRbNzzUANI242a6S2OJa3GgbQD"
+        },
+        map: map,
+        styleId: 6,
+        templateId: 6
+      });
+      
+  layer_12 = new google.maps.FusionTablesLayer({
+  suppressInfoWindows:true,
+  query: {
+    select: 'geometry',
+    from: '1363128'
+  }}),
+ 
+ 
+ google.maps.event.addListener(layer_0, "click", openIW);
+ google.maps.event.addListener(layer_1, "click", openIW);
+ google.maps.event.addListener(layer_2, "click", openIW);
+ google.maps.event.addListener(layer_3, "click", openIW);
+ google.maps.event.addListener(layer_4, "click", openIW);
+ google.maps.event.addListener(layer_5, "click", openIW);
+ google.maps.event.addListener(map, "click", function() { infoWindow.close();});
+
+
+layer_0.setMap(map);
+layer_1.setMap(map);
+layer_2.setMap(map);
+layer_3.setMap(map);
+layer_4.setMap(map);
+layer_5.setMap(map);
+}
+function changeLayer(tableidselections) {
+	if (tableidselections == 00){
+		 if (document.getElementById("State").checked == true) {
+		   if(layer_0.getMap() == null) { layer_0.setMap(map); }
+		 }
+	
+		 if (document.getElementById("State").checked == false) {
+			 layer_0.setMap(null);  /*layersetoff*/
+		 }
+	
+	}
+
+	if (tableidselections == 01){
+		 if (document.getElementById("Asian").checked == true) {
+		   if(layer_1.getMap() == null) { layer_1.setMap(map); }
+		 }
+	
+		 if (document.getElementById("Asian").checked == false) {
+			 layer_1.setMap(null);  /*layersetoff*/
+		 }
+	
+	}
+	
+	if (tableidselections == 02){
+		 if (document.getElementById("Black").checked == true) {
+		   if(layer_2.getMap() == null) { layer_2.setMap(map); }
+		 }
+	
+		 if (document.getElementById("Black").checked == false) {
+			 layer_2.setMap(null); /*layersetoff*/
+		 }
+	}
+	if (tableidselections == 03){
+		 if (document.getElementById("Hispanic").checked == true) {
+		   if(layer_3.getMap() == null) { layer_3.setMap(map); }
+		 }
+	
+		 if (document.getElementById("Hispanic").checked == false) {
+			 layer_3.setMap(null); /*layersetoff*/
+		 }
+	}
+	if (tableidselections == 04){
+		 if (document.getElementById("White").checked == true) {
+		   if(layer_4.getMap() == null) { layer_4.setMap(map); }
+		 }
+	
+		 if (document.getElementById("White").checked == false) {
+			 layer_4.setMap(null); /*layersetoff*/
+		 }
+	}
+if (tableidselections == 05){
+		 if (document.getElementById("ALICE").checked == true) {
+		   if(layer_5.getMap() == null) { layer_5.setMap(map); }
+		 }
+	
+		 if (document.getElementById("ALICE").checked == false) {
+			 layer_5.setMap(null); /*layersetoff*/
+		 }
+	}
+
+	
+}
+</script> 
+</head> 
+<body onLoad="initialize();"> 
+<div id="map_canvas"></div> 
+<div id="checkboxes">  
+<form> 
+<p>ALICE %</p>
+<input type="checkbox" value="00" id="State" onclick="changeLayer(this.value);" checked="checked">State</input><br />
+<input type="checkbox" value="01" id="Asian" onclick="changeLayer(this.value);" checked="checked">Asian</input><br />
+<input type="checkbox" value="02" id="Black" onclick="changeLayer(this.value);"checked="checked">Black</input><br />
+<input type="checkbox" value="03" id="Hispanic" onclick="changeLayer(this.value);"checked="checked">Hispanic</input><br />
+<input type="checkbox" value="04" id="White" onclick="changeLayer(this.value);"checked="checked">White</input><br />
+<input type="checkbox" value="05" id="ALICE" onclick="changeLayer(this.value);"checked="checked">ALL</input><br />
+
+</form> 
+</div>
+
+ 
+
+</script> 
+</body> 
+</html> 
