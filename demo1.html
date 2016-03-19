@@ -115,7 +115,7 @@ function initialize() {
   }}),
  
  
- google.maps.event.addListener(layer_0, "click", openIW);
+ 
  google.maps.event.addListener(layer_1, "click", openIW);
  google.maps.event.addListener(layer_2, "click", openIW);
  google.maps.event.addListener(layer_3, "click", openIW);
@@ -124,7 +124,6 @@ function initialize() {
  google.maps.event.addListener(map, "click", function() { infoWindow.close();});
 
 
-layer_0.setMap(map);
 layer_1.setMap(map);
 layer_2.setMap(map);
 layer_3.setMap(map);
@@ -200,7 +199,7 @@ if (tableidselections == 05){
 <div id="checkboxes">  
 <form> 
 <p>ALICE %</p>
-<input type="checkbox" value="00" id="State" onclick="changeLayer(this.value);" checked="checked">State</input><br />
+
 <input type="checkbox" value="01" id="Asian" onclick="changeLayer(this.value);" checked="checked">Asian</input><br />
 <input type="checkbox" value="02" id="Black" onclick="changeLayer(this.value);"checked="checked">Black</input><br />
 <input type="checkbox" value="03" id="Hispanic" onclick="changeLayer(this.value);"checked="checked">Hispanic</input><br />
