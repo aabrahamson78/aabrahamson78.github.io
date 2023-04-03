@@ -1,42 +1,62 @@
-body {
-	font-family: Arial, sans-serif;
+/* Styles for the video background */
+#video-background {
+	position: fixed;
+	right: 0;
+	bottom: 0;
+	min-width: 100%;
+	min-height: 100%;
+	z-index: -1;
+  }
+  
+  #myVideo {
+	display: none;
+  }
+  
+  #about {
+	position: relative;
+	z-index: 1;
+  }
+  
+  /* Other styles */
+  body {
+	font-family: sans-serif;
 	margin: 0;
   }
   
   header {
 	background-color: #333;
 	color: white;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 	padding: 1em;
   }
   
-  nav ul {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-  }
-  
-  nav li {
-	display: inline-block;
-	margin-right: 1em;
+  nav {
+	display: flex;
   }
   
   nav a {
 	color: white;
 	text-decoration: none;
+	padding: 0.5em;
+  }
+  
+  nav a:hover {
+	background-color: #555;
   }
   
   section {
 	padding: 2em;
   }
   
-  section h1 {
+  h1 {
 	font-size: 2em;
-	margin-top: 0;
+	margin-bottom: 0.5em;
   }
   
-  section p {
+  p {
 	font-size: 1.2em;
+	line-height: 1.5;
   }
- 
-
   
