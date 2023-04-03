@@ -53,3 +53,34 @@ body {
 	object-fit: cover;
   }
   
+  nav ul li ul {
+	display: none;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	z-index: 1;
+	background-color: #5d24d8;
+	padding: 0;
+	margin: 0;
+	box-shadow: 0 2px 4px rgba(181, 12, 12, 0.1);
+  }
+  
+  nav ul li:hover ul {
+	display: block;
+  }
+  
+  nav ul li ul li {
+	display: block;
+	margin: 0;
+	padding: 10px;
+  }
+  
+  nav ul li ul li a {
+	color: #822929;
+	text-decoration: none;
+  }
+  
+  nav ul li ul li:hover {
+	background-color: #f0f0f0;
+  }
+  
