@@ -1007,7 +1007,7 @@ var legend = L.control({ position: "bottomright" });
 
 legend.onAdd = function(map) {
     var div = L.DomUtil.create("div", "legend");
-    div.innerHTML += '<img src="https://www.dropbox.com/s/u4240upxqyfgt6h/Legend.png?raw=1" width = "200" height = "40"/>';
+    div.innerHTML += '<img src=css/images/Legend-1.png width = "200" height = "40"/>';
     return div;
   };
   legend.addTo(map);
