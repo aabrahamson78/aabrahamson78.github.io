@@ -1,24 +1,133 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Landing Page</title>
-    <link rel="stylesheet" href="styles.css">
-  </head>
-  <body>
-    <header>
-      <nav>
-        <ul>
-          <li><a href="index.html#about">About</a></li>
-          <li><a href="index.html#projects">Projects</a></li>
-          <li><a href="index.html#work">Work</a></li>
-          <li><a href="index.html#contact">Contact</a></li>
-        </ul>
-      </nav>
-    </header>
-    
-    
-<body>
-    
-</body>
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/styledLayerControl.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <label for="state-input">Select state:</label>
+        <input type="text" id="state-input" name="state-input">
+        <button id="reload-btn">Reload</button><P>Hit reload again if map doesn't load</P>
+        <div id="map"></div>
+        
+        <script>
+          var st = ''; // initialize st variable
+        
+          // function to update st when user types in input field
+          document.getElementById("state-input").addEventListener("input", function(){
+            st = document.getElementById("state-input").value;
+            console.log(st); // log st to the console for debugging
+          }, { passive: true });
+        
+          // function to reload page with new st value
+          function reloadPage() {
+            window.location.href = window.location.origin + window.location.pathname + '?st=' + st;
+          }
+        
+          // reload button click event listener
+          document.getElementById("reload-btn").addEventListener("click", function(){
+            reloadPage();
+          }, { passive: true });
+          
+          // load JavaScript files when the page loads
+          window.addEventListener('load', function() {
+            var queryParams = new URLSearchParams(window.location.search);
+            if (queryParams.has('st')) {
+              st = queryParams.get('st');
+              document.getElementById("state-input").value = st;
+              loadJavaScriptFiles();
+            }
+          });
+        
+          function loadJavaScriptFiles() {
+            // ALICE_County
+            var fileName = "ALICE_County_" + st + ".js";
+            var scriptTag = document.createElement("script");
+            scriptTag.src = "data/ALICECounty/" + fileName;
+            document.body.insertBefore(scriptTag, document.body.firstChild);
+            // ALICE_ZIPCODE
+            var fileName = "ALICE_ZIPCODE_" + st + ".js";
+            var scriptTag = document.createElement("script");
+            scriptTag.src = "data/ALICEZIPCODE/" + fileName;
+            document.body.appendChild(scriptTag);
+            // ALICE_SUBCOUNTY
+            var fileName = "ALICE_SUBCOUNTY_" + st + ".js";
+            var scriptTag = document.createElement("script");
+            scriptTag.src = "data/ALICESUBCOUNTY/" + fileName;
+            document.body.appendChild(scriptTag);
+            // ALICE_PLACES
+            var fileName = "ALICE_PLACES_" + st + ".js";
+            var scriptTag = document.createElement("script");
+            scriptTag.src = "data/ALICEPLACES/" + fileName;
+            document.body.appendChild(scriptTag);
+            // type_banksgeojsons_4
+            var fileName = "type_banksgeojsons_4_" + st + ".js";
+            var scriptTag = document.createElement("script");
+            scriptTag.src = "data/type_banksgeojsons_4/" + fileName;
+            document.body.appendChild(scriptTag);
+            // type_healthcarefacilities_0
+            var fileName = "type_healthcarefacilities_0_" + st + ".js";
+            var scriptTag = document.createElement("script");
+            scriptTag.src = "data/type_healthcarefacilities_0/" + fileName;
+            document.body.appendChild(scriptTag);
+            // type_libraries_1
+            var fileName = "type_libraries_1_" + st + ".js";
+            var scriptTag = document.createElement("script");
+            scriptTag.src = "data/type_libraries_1/" + fileName;
+            document.body.appendChild(scriptTag);
+            // type_mentalhealthsamhsageojsons_11
+            var fileName = "type_mentalhealthsamhsageojsons_11_" + st + ".js";
+            var scriptTag = document.createElement("script");
+            scriptTag.src = "data/type_mentalhealthsamhsageojsons_11/" + fileName;
+            document.body.appendChild(scriptTag);
+            // type_substanceabusesamhsageojsons_2
+            var fileName = "type_substanceabusesamhsageojsons_2_" + st + ".js";
+            var scriptTag = document.createElement("script");
+            scriptTag.src = "data/type_substanceabusesamhsageojsons_2/" + fileName;
+            document.body.appendChild(scriptTag);
+                  // load Map.js after all other scripts have loaded
+            var mapScriptTag = document.createElement("script");
+            mapScriptTag.src = "js/Map.js";
+            document.body.appendChild(mapScriptTag);
+          }
+        </script>
+        
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/styledLayerControl.js"></script>
+
+        <script src="data/type_PennsylvaniaChildCareFacilitiesgeojsons_0.js"></script>
+        <script src="data/type_primarycarehpsageojsons_1.js"></script>
+        <script src="data/type_VirginiaFreeClinicsgeojsons_3.js"></script>
+        <script src="data/type_CreditUnionsNewJerseygeojsons_5.js"></script>
+        <script src="data/type_CreditUnionsPennsylvaniageojsons_6.js"></script>
+        <script src="data/type_dentalhpsageojsons_7.js"></script>
+        <script src="data/type_higheredinstitutionsgeojsons_9.js"></script>
+        
+
+              
+    </body>
 </html>
