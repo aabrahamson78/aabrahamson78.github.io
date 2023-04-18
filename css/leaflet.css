@@ -349,12 +349,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	}
 .leaflet-control-layers-toggle {
 	background-image: url(images/layers.png);
-	width: 36px;
-	height: 36px;
+	width: 56px;
+	height: 56px;
 	}
 .leaflet-retina .leaflet-control-layers-toggle {
 	background-image: url(images/layers-2x.png);
-	background-size: 26px 26px;
+	background-size: 46px 46px;
 	}
 .leaflet-touch .leaflet-control-layers-toggle {
 	width: 44px;
