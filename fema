@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenFEMA Individual Assistance Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { theme: { extend: { colors: { 'alice-blue': '#0044B5', 'alice-dark': '#002D7A', 'alice-action': '#005191', 'alice-yellow': '#FFBA00', 'alice-bg': '#F8F9FA', 'alice-card': '#FFFFFF', 'alice-border': '#E9ECEF' }, fontFamily: { antonio: ["'Antonio'", 'sans-serif'], palanquin: ["'Palanquin'", 'sans-serif'], inter: ["'Inter'", 'sans-serif'] } } } }</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/topojson-client@3/dist/topojson-client.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&family=Palanquin:wght@400;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --alice-blue: #0044B5;
+            --alice-dark-blue: #002D7A;
+            --alice-action-blue: #005191;
+            --alice-yellow: #FFBA00;
+            --alice-bg: #F8F9FA;
+            --alice-card-bg: #FFFFFF;
+            --alice-text: #212529;
+            --alice-text-blue: #0044B5;
+            --alice-border: #E9ECEF;
+        }
+
+        body {
+            background-color: var(--alice-bg);
+            color: var(--alice-text);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-antonio {
+            font-family: 'Antonio', sans-serif;
+        }
+
+        .font-palanquin {
+            font-family: 'Palanquin', sans-serif;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ced4da;
+            border-radius: 10px;
+        }
+
+        .glass {
+            background: var(--alice-card-bg);
+            border: 1px solid var(--alice-border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .gradient-text {
+            color: var(--alice-blue);
+        }
+
+        .btn-brand {
+            background: var(--alice-blue);
+            color: white;
+            font-family: 'Palanquin', sans-serif;
+            font-weight: 700;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-brand:hover {
+            background: var(--alice-action-blue);
+            transform: translateY(-1px);
+        }
+
+        .disaster-card {
+            background: white;
+            border: 1px solid var(--alice-border);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .disaster-card:hover {
+            border-color: var(--alice-blue);
+            background: #f1f5ff;
+        }
+
+        .disaster-card.active {
+            border-color: var(--alice-blue);
+            background: #eef2ff;
+            border-left: 4px solid var(--alice-blue);
+        }
+
+        /* Stat Card Redesign */
+        .stat-card {
+            background: white;
+            border-top: 4px solid var(--alice-blue);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Socioeconomic House Icons */
+        .alice-house-card {
+            background: white;
+            border: 1px solid var(--alice-border);
+            border-radius: 12px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .alice-house-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -10px rgba(0, 68, 181, 0.1);
+        }
+
+        .house-svg-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .house-outline {
+            fill: none;
+            stroke: #dee2e6;
+            stroke-width: 2;
+        }
+
+        /* Table Overhaul */
+        .data-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 1rem;
+            background: #F8F9FA;
+            color: var(--alice-blue);
+            font-family: 'Palanquin', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--alice-border);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--alice-border);
+            font-size: 0.875rem;
+            color: #495057;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background: #f8f9ff;
+        }
+
+        /* Totals row */
+        .socio-total-row td {
+            background: var(--alice-blue) !important;
+            color: white !important;
+            font-family: 'Palanquin', sans-serif;
+            font-weight: 700;
+            border-bottom: none;
+        }
+
+        .brand-header {
+            background: white;
+            border-bottom: 3px solid var(--alice-blue);
+        }
+
+        .brand-logo-text {
+            font-family: 'Antonio', sans-serif;
+            color: var(--alice-blue);
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-accent-line {
+            height: 4px;
+            background: linear-gradient(to right, var(--alice-blue), var(--alice-yellow));
+            border-radius: 2px;
+        }
+
+        /* Input Fields */
+        .search-input {
+            background: white;
+            border: 1px solid var(--alice-border);
+            color: var(--alice-text);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--alice-blue);
+            box-shadow: 0 0 0 3px rgba(0, 68, 181, 0.08);
+        }
+
+        .filter-select {
+            background: white;
+            border: 1px solid var(--alice-border);
+            color: var(--alice-text);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .filter-select:focus {
+            border-color: var(--alice-blue);
+        }
+
+        .filter-select:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* Charts */
+        .chart-container {
+            position: relative;
+            min-height: 280px;
+        }
+
+        /* Loader */
+        .loader {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Loading state */
+        #detailsLoader {
+            min-height: 300px;
+        }
+
+        /* County map */
+        #countyMap {
+            z-index: 0;
+        }
+
+        .county-tooltip {
+            background: white;
+            border: 1px solid var(--alice-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .leaflet-tooltip.county-tooltip::before {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
+        <!-- Brand Header -->
+        <header
+            class="brand-header px-6 py-4 flex flex-col md:flex-row items-center justify-between mb-8 rounded-t-2xl">
+            <div class="flex items-center gap-3 mb-4 md:mb-0">
+                <div class="flex flex-col">
+                    <h1 class="brand-logo-text text-3xl leading-none">United For <span
+                            class="text-alice-yellow">ALICE</span></h1>
+                    <div class="brand-accent-line mt-1"></div>
+                </div>
+                <div class="h-8 w-[1px] bg-gray-200 mx-4 hidden md:block"></div>
+                <h2 class="font-palanquin font-bold text-gray-500 uppercase tracking-widest text-xs hidden lg:block">
+                    FEMA Assistance Insights</h2>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                    <input type="text" id="searchInput" placeholder="Search disasters..."
+                        class="search-input w-48 lg:w-64 pl-10 pr-4 py-2 rounded-lg text-sm">
+                </div>
+                <div class="flex gap-2 flex-wrap">
+                    <select id="yearFilter" class="filter-select text-sm text-gray-600">
+                        <option value="">Year (All)</option>
+                    </select>
+                    <select id="stateFilter" class="filter-select text-sm text-gray-600">
+                        <option value="">State (All)</option>
+                    </select>
+                    <select id="countyFilter" class="filter-select text-sm text-gray-600" disabled>
+                        <option value="">County (All)</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar: Disaster Selection -->
+            <aside class="lg:col-span-1 space-y-4">
+                <div class="glass rounded-xl p-4 h-[calc(100vh-250px)] lg:h-[800px] overflow-hidden flex flex-col">
+                    <div class="flex items-center gap-2 mb-4 px-2">
+                        <i data-lucide="list" class="w-4 h-4 text-alice-blue"></i>
+                        <h3 class="font-palanquin font-bold uppercase text-xs tracking-wider text-gray-500">Declared
+                            Disasters</h3>
+                        <div id="sidebarLoader"
+                            class="hidden h-3 w-3 animate-spin border-2 border-gray-200 border-t-alice-blue rounded-full">
+                        </div>
+                    </div>
+                    <div id="disasterList" class="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                        <!-- Cards injected here -->
+                    </div>
+                </div>
+            </aside>
+
+
+            <!-- Dashboard Content -->
+            <div id="dashboardContent" class="lg:col-span-3 space-y-8">
+                <!-- Empty State -->
+                <div id="emptyState"
+                    class="h-full glass rounded-2xl flex flex-col items-center justify-center text-center p-12 border-dashed border-2">
+                    <div class="w-20 h-20 bg-alice-blue/5 rounded-3xl flex items-center justify-center mb-6">
+                        <i data-lucide="bar-chart-3" class="h-10 w-10 text-alice-blue/50"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold font-palanquin text-gray-800 mb-2">Ready to Explore</h3>
+                    <p class="text-gray-500 max-w-sm">Select a disaster declaration from the list to analyze its
+                        socioeconomic and assistance statistics.</p>
+                </div>
+
+                <!-- Data State (Hidden) -->
+                <div id="dataState" class="hidden space-y-8 animate-in fade-in duration-500">
+                    <!-- Top Summary Stats -->
+                    <div id="statsRow" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="stat-card p-6 rounded-xl">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold uppercase tracking-widest text-alice-blue">Total
+                                    Registrations</span>
+                                <i data-lucide="users" class="w-4 h-4 text-alice-blue/40"></i>
+                            </div>
+                            <div id="statTotalRegs" class="text-3xl font-antonio font-bold text-gray-900">—</div>
+                            <div class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">Valid IHP Registrations
+                            </div>
+                        </div>
+                        <div class="stat-card p-6 rounded-xl">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold uppercase tracking-widest text-alice-blue">Total
+                                    Approved</span>
+                                <i data-lucide="check-circle" class="w-4 h-4 text-alice-blue/40"></i>
+                            </div>
+                            <div id="statTotalApproved" class="text-3xl font-antonio font-bold text-gray-900">—</div>
+                            <div class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">Total IHP Expenditure
+                            </div>
+                        </div>
+                        <div class="stat-card p-6 rounded-xl">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold uppercase tracking-widest text-alice-blue">Avg
+                                    Assistance</span>
+                                <i data-lucide="banknote" class="w-4 h-4 text-alice-blue/40"></i>
+                            </div>
+                            <div id="statAvgApproved" class="text-3xl font-antonio font-bold text-gray-900">—</div>
+                            <div class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">Per Approved Household
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass p-6 rounded-xl">
+                            <h4 class="font-palanquin font-bold text-alice-blue uppercase tracking-wider text-xs mb-6">
+                                Homeowners vs Renters (Scaled)</h4>
+                            <div class="chart-container">
+                                <canvas id="ownRentChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="glass p-6 rounded-xl">
+                            <h4 class="font-palanquin font-bold text-alice-blue uppercase tracking-wider text-xs mb-6">
+                                Assistance Type Distribution (Scaled)</h4>
+                            <div class="chart-container">
+                                <canvas id="assistanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- County Map Section -->
+                    <div class="glass rounded-xl overflow-hidden">
+                        <div class="px-6 pt-5 pb-3 flex items-center gap-3 border-b border-alice-border">
+                            <i data-lucide="map" class="w-5 h-5 text-alice-blue"></i>
+                            <h2 class="text-base font-palanquin font-bold text-gray-800 uppercase tracking-wider">IHP
+                                Approved Assistance by County</h2>
+                            <span id="mapLoaderBadge"
+                                class="hidden ml-auto text-[10px] font-bold uppercase tracking-widest text-gray-400 animate-pulse">Loading
+                                map…</span>
+                        </div>
+                        <div id="countyMap" style="height:420px;"></div>
+                        <div id="mapLegend"
+                            class="hidden px-6 py-3 flex items-center gap-2 border-t border-alice-border text-xs text-gray-500">
+                            <span>Less</span>
+                            <div id="mapLegendBar" class="flex-1 h-3 rounded-full"
+                                style="background: linear-gradient(to right, #dbeafe, #0044B5);"></div>
+                            <span>More</span>
+                            <span id="mapLegendMax" class="ml-3 font-bold text-alice-blue"></span>
+                        </div>
+                    </div>
+
+                    <!-- Socioeconomic Analysis Section -->
+                    <div class="space-y-6 pt-6">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="p-2 bg-alice-blue/5 rounded-lg">
+                                <i data-lucide="shield-check" class="h-6 w-6 text-alice-blue"></i>
+                            </div>
+                            <h2 class="text-2xl font-antonio font-bold text-gray-900 uppercase">Socioeconomic Analysis
+                                (ALICE)</h2>
+                        </div>
+
+                        <!-- Approval Rates Row -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="approvalRateVisuals">
+                            <!-- House icons will be injected here -->
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Application Status -->
+                            <div class="glass p-6 rounded-xl">
+                                <h4
+                                    class="font-palanquin font-bold text-alice-blue uppercase tracking-wider text-xs mb-6">
+                                    Application Status by Category</h4>
+                                <div class="chart-container">
+                                    <canvas id="statusByCategoryChart"></canvas>
+                                </div>
+                            </div>
+                            <!-- Assistance Breakdown -->
+                            <div class="glass p-6 rounded-xl">
+                                <h4
+                                    class="font-palanquin font-bold text-alice-blue uppercase tracking-wider text-xs mb-6">
+                                    Assistance Breakdown (Mean Amount)</h4>
+                                <div class="chart-container">
+                                    <canvas id="assistanceBreakdownChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Funding Butterfly Chart -->
+                            <div class="glass p-6 rounded-xl">
+                                <h4
+                                    class="font-palanquin font-bold text-alice-blue uppercase tracking-wider text-xs mb-6">
+                                    Funding Distribution: Owners vs Renters</h4>
+                                <div class="chart-container">
+                                    <canvas id="butterflyChart"></canvas>
+                                </div>
+                            </div>
+                            <!-- Assistance Shares -->
+                            <div class="glass p-6 rounded-xl flex flex-col">
+                                <h4
+                                    class="font-palanquin font-bold text-alice-blue uppercase tracking-wider text-xs mb-6">
+                                    Assistance by Category (Share)</h4>
+                                <div class="flex-1 flex items-center justify-center min-h-[300px]">
+                                    <canvas id="shareDonutChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary Table -->
+                        <div class="glass rounded-xl overflow-hidden">
+                            <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+                                <h4
+                                    class="font-palanquin font-bold text-gray-700 uppercase tracking-widest text-[10px]">
+                                    Detailed Summary by Group</h4>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="data-table" id="socioTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Group</th>
+                                            <th>Total Apps</th>
+                                            <th>% of Apps</th>
+                                            <th>Total Approved</th>
+                                            <th>Approval Rate</th>
+                                            <th>Avg. Assistance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="socioTableBody">
+                                        <!-- Rows injected here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Assistance Details Table -->
+                        <div class="glass rounded-xl overflow-hidden mt-6">
+                            <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+                                <h4
+                                    class="font-palanquin font-bold text-gray-700 uppercase tracking-widest text-[10px]">
+                                    Assistance Details by Type and ALICE Income Group</h4>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="data-table" id="assistanceDetailsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Group</th>
+                                            <th class="text-right">Rent Count</th>
+                                            <th class="text-right">Avg Rent</th>
+                                            <th class="text-right">Repair Count</th>
+                                            <th class="text-right">Avg Repair</th>
+                                            <th class="text-right">Prop Count</th>
+                                            <th class="text-right">Avg Prop</th>
+                                            <th class="text-right">Other Count</th>
+                                            <th class="text-right">Avg Other</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="asstDetailsTableBody">
+                                        <!-- Rows injected here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="disasterContext"
+                        class="glass p-8 rounded-2xl bg-white flex flex-col md:flex-row justify-between items-center gap-8 border-l-8 border-alice-blue">
+                        <div>
+                            <span
+                                class="inline-block px-3 py-1 bg-alice-blue/10 text-alice-blue text-[10px] font-bold rounded-full mb-3 uppercase tracking-widest">Selected
+                                Disaster Report</span>
+                            <h3 id="contextTitle" class="text-3xl font-antonio font-bold text-gray-900 mb-2">—</h3>
+                            <div class="flex gap-6 text-gray-500 text-sm">
+                                <span class="flex items-center gap-2"><i data-lucide="map-pin"
+                                        class="h-4 w-4 text-alice-blue"></i>
+                                    <span id="contextState">—</span></span>
+                                <span class="flex items-center gap-2"><i data-lucide="calendar"
+                                        class="h-4 w-4 text-alice-blue"></i>
+                                    <span id="contextDate">—</span></span>
+                            </div>
+                        </div>
+                        <a id="contextLink" href="#" target="_blank"
+                            class="btn-brand px-8 py-4 flex items-center gap-2 uppercase text-xs tracking-widest">
+                            FEMA Official Details
+                            <i data-lucide="external-link" class="h-4 w-4"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="detailsLoader"
+                    class="hidden h-[65vh] glass rounded-[2.5rem] flex flex-col items-center justify-center text-center">
+                    <div class="relative mb-8">
+                        <div class="h-20 w-20 loader border-4 border-slate-700 rounded-full border-t-sky-400"></div>
+                        <i data-lucide="database" class="absolute inset-0 m-auto h-8 w-8 text-sky-400 p-1"></i>
+                    </div>
+                    <h4 class="text-2xl font-bold text-slate-200">Processing Datasets</h4>
+                    <p class="text-slate-500 mt-2">Connecting to OpenFEMA API Gateway...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE = "https://www.fema.gov/api/open/v2";
+        let disasters = [];
+        let ownRentChart = null;
+        let assistanceChart = null;
+        let statusByCategoryChart = null;
+        let assistanceBreakdownChart = null;
+        let butterflyChart = null;
+        let shareDonutChart = null;
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Chart.js Brand Defaults
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = "#495057";
+        Chart.defaults.plugins.tooltip.backgroundColor = "rgba(0, 68, 181, 0.9)";
+        Chart.defaults.plugins.tooltip.padding = 12;
+        Chart.defaults.plugins.tooltip.cornerRadius = 8;
+        Chart.defaults.plugins.legend.labels.font = { weight: '600', size: 11 };
+
+        const BRAND_COLORS = {
+            blue: '#0044B5',
+            yellow: '#FFBA00',
+            actionBlue: '#005191',
+            gray: '#E9ECEF',
+            poverty: '#ef4444', // Kept for visibility, but could be adjusted
+            alice: '#FFBA00',
+            aboveAlice: '#0044B5'
+        };
+
+        // ---------------- Helpers ----------------
+
+        function getALICECategory(reg) {
+            const income = reg.grossIncome || '';
+            const occupants =
+                parseInt(reg.occupantsUnderTwo || 0) +
+                parseInt(reg.occupants2to5 || 0) +
+                parseInt(reg.occupants6to18 || 0) +
+                parseInt(reg.occupants19to64 || 0) +
+                parseInt(reg.occupants65andOver || 0);
+
+            // Poverty thresholds (actual dataset values)
+            const povertyIncomes = ['<$15,000', '0'];
+            if (povertyIncomes.includes(income)) return 'Poverty';
+
+            // Above ALICE (Using broad middle-to-high thresholds for the dashboard)
+            const highIncome = ['>$175,000', '$120,001-$175,000', '$60,001-$120,000'];
+            if (highIncome.includes(income)) return 'Above ALICE';
+
+            // ALICE ($15,000 - $60,000)
+            return 'ALICE';
+        }
+
+        // ---------------- API Calls ----------------
+
+        async function fetchDisasters() {
+            const query = document.getElementById('searchInput').value;
+            const year = document.getElementById('yearFilter').value;
+            const state = document.getElementById('stateFilter').value;
+            const county = document.getElementById('countyFilter').value;
+
+            const listEl = document.getElementById('disasterList');
+            const loader = document.getElementById('sidebarLoader');
+
+            loader.classList.remove('hidden');
+
+            try {
+                let filterParts = ["ihProgramDeclared eq true"];
+
+                if (query) {
+                    const cleanQuery = query.replace(/'/g, "''");
+                    filterParts.push(`contains(declarationTitle, '${cleanQuery}')`);
+                }
+
+                if (year) {
+                    filterParts.push(`declarationDate ge '${year}-01-01T00:00:00.000Z' and declarationDate le '${year}-12-31T23:59:59.000Z'`);
+                }
+
+                if (state) {
+                    filterParts.push(`state eq '${state}'`);
+                }
+
+                if (state && county) {
+                    filterParts.push(`contains(designatedArea, '${county.replace(/'/g, "''")}')`);
+                }
+
+                const filter = filterParts.join(' and ');
+                const response = await fetch(`${API_BASE}/DisasterDeclarationsSummaries?$filter=${encodeURIComponent(filter)}&$orderby=declarationDate desc&$top=50`);
+                const data = await response.json();
+                const rawDisasters = data.DisasterDeclarationsSummaries || [];
+
+                const seen = new Set();
+                disasters = rawDisasters.filter(d => {
+                    if (seen.has(d.disasterNumber)) return false;
+                    seen.add(d.disasterNumber);
+                    return true;
+                }).slice(0, 15);
+
+                renderDisasterList();
+            } catch (err) {
+                console.error("Fetch error:", err);
+                listEl.innerHTML = '<div class="text-rose-400 p-4">Error loading disasters.</div>';
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        async function loadDisasterDetails(disaster) {
+            const emptyState = document.getElementById('emptyState');
+            const dataState = document.getElementById('dataState');
+            const loader = document.getElementById('detailsLoader');
+            const selectedCounty = document.getElementById('countyFilter').value;
+
+            emptyState.classList.add('hidden');
+            dataState.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            try {
+                // 1. Fetch accurate totals from Summary endpoint (RI-IHP)
+                let allSummaries = [];
+                let skip = 0;
+                const top = 1000;
+
+                let summaryFilter = `disasterNumber eq ${disaster.disasterNumber}`;
+                if (selectedCounty) {
+                    summaryFilter += ` and contains(county, '${selectedCounty.replace(/'/g, "''")}')`;
+                }
+
+                while (true) {
+                    const summaryResp = await fetch(`${API_BASE}/RegistrationIntakeIndividualsHouseholdPrograms?$filter=${encodeURIComponent(summaryFilter)}&$top=${top}&$skip=${skip}`);
+                    const summaryData = await summaryResp.json();
+                    const batch = summaryData.RegistrationIntakeIndividualsHouseholdPrograms || [];
+                    allSummaries = allSummaries.concat(batch);
+                    if (batch.length < top) break;
+                    skip += top;
+                }
+
+                if (allSummaries.length === 0) {
+                    throw new Error("No data found for the selected combination.");
+                }
+
+                // Aggregate RI-IHP totals
+                const totals = allSummaries.reduce((acc, s) => {
+                    acc.totalValidRegistrations += (s.totalValidRegistrations || 0);
+                    acc.ihpAmount += (s.ihpAmount || 0);
+                    acc.haAmount += (s.haAmount || 0);
+                    acc.onaAmount += (s.onaAmount || 0);
+                    return acc;
+                }, { totalValidRegistrations: 0, ihpAmount: 0, haAmount: 0, onaAmount: 0 });
+
+                // 2. Fetch a sample
+                let regFilter = `disasterNumber eq ${disaster.disasterNumber}`;
+                if (selectedCounty) {
+                    regFilter += ` and county eq '${selectedCounty.replace(/'/g, "''")}'`;
+                }
+                const regResp = await fetch(`${API_BASE}/IndividualsAndHouseholdsProgramValidRegistrations?$filter=${encodeURIComponent(regFilter)}&$top=1000`);
+                const regData = await regResp.json();
+                const regSample = regData.IndividualsAndHouseholdsProgramValidRegistrations || [];
+
+                updateDashboard(disaster, totals, regSample, allSummaries);
+                loader.classList.add('hidden');
+                dataState.classList.remove('hidden');
+            } catch (err) {
+                console.error("Load error:", err);
+                alert(err.message || "Failed to load details.");
+                loader.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            }
+        }
+
+        // ---------------- UI Rendering ----------------
+
+        function renderDisasterList() {
+            const listEl = document.getElementById('disasterList');
+            if (disasters.length === 0) {
+                listEl.innerHTML = '<div class="text-slate-500 text-center py-8">No results found.</div>';
+                return;
+            }
+
+            listEl.innerHTML = disasters.map(d => `
+                <div class="disaster-card glass p-5 rounded-2xl border" onclick="handleDisasterClick('${d.id}')" id="card-${d.id}">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-sky-400">#${d.disasterNumber}</span>
+                        <span class="text-[10px] text-slate-500 font-bold">${new Date(d.declarationDate).toLocaleDateString()}</span>
+                    </div>
+                    <h4 class="font-bold text-slate-200 line-clamp-1">${d.declarationTitle}</h4>
+                    <div class="flex items-center gap-2 mt-3 text-xs text-slate-400 font-medium">
+                        <i data-lucide="map-pin" class="h-3 w-3"></i>
+                        ${d.state}
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function handleDisasterClick(id) {
+            const disaster = disasters.find(d => d.id === id);
+            document.querySelectorAll('.disaster-card').forEach(c => c.classList.remove('active'));
+            document.getElementById(`card-${id}`).classList.add('active');
+            loadDisasterDetails(disaster);
+        }
+
+        function updateDashboard(disaster, totals, regSample, allSummaries) {
+            // Stats from RI-IHP summary
+            document.getElementById('statTotalApproved').innerText = formatCurrency(totals.ihpAmount);
+            document.getElementById('statTotalRegs').innerText = totals.totalValidRegistrations.toLocaleString();
+            document.getElementById('statAvgApproved').innerText = formatCurrency(totals.ihpAmount / (totals.totalValidRegistrations || 1));
+
+            document.getElementById('contextTitle').innerText = disaster.declarationTitle;
+            document.getElementById('contextState').innerText = disaster.state;
+            document.getElementById('contextDate').innerText = new Date(disaster.declarationDate).toDateString();
+            document.getElementById('contextLink').href = `https://www.fema.gov/disaster/${disaster.disasterNumber}`;
+
+            // County Map
+            renderCountyMap(disaster.state, allSummaries);
+
+            // Distribution Charts from sample - passing totals for scaling
+            renderCharts(regSample, totals);
+        }
+
+        // ---- County Map ----
+        let countyMap = null;
+        let countyTopoCache = null;
+        let countyLayer = null;
+
+        async function renderCountyMap(stateAbbr, summaries) {
+            document.getElementById('mapLoaderBadge').classList.remove('hidden');
+            document.getElementById('mapLegend').classList.add('hidden');
+
+            // Build county -> amount lookup from summaries (county field may be like "Lee (County)" or "Lee")
+            const countyAmounts = {};
+            summaries.forEach(s => {
+                if (!s.county) return;
+                const key = s.county
+                    .replace(/\s*\(County\)$/i, '')
+                    .replace(/\s+County$/i, '')
+                    .replace(/\s+Parish$/i, '')
+                    .replace(/\s+Borough$/i, '')
+                    .replace(/\s+Census Area$/i, '')
+                    .trim()
+                    .toLowerCase();
+                countyAmounts[key] = (countyAmounts[key] || 0) + (s.ihpAmount || 0);
+            });
+
+            const maxAmount = Math.max(...Object.values(countyAmounts), 1);
+
+            // Load TopoJSON (cached)
+            if (!countyTopoCache) {
+                const resp = await fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/counties-10m.json');
+                countyTopoCache = await resp.json();
+            }
+
+            // Convert to GeoJSON and filter to disaster state
+            const stateNameMap = {
+                AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California', CO: 'Colorado', CT: 'Connecticut',
+                DE: 'Delaware', FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana',
+                IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts',
+                MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri', MT: 'Montana', NE: 'Nebraska',
+                NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey', NM: 'New Mexico', NY: 'New York', NC: 'North Carolina',
+                ND: 'North Dakota', OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island',
+                SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
+                VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
+                DC: 'District of Columbia', PR: 'Puerto Rico', GU: 'Guam', VI: 'Virgin Islands',
+                AS: 'American Samoa', MP: 'Northern Mariana Islands'
+            };
+
+            // State FIPS map
+            const stateFipsMap = {
+                AL: '01', AK: '02', AZ: '04', AR: '05', CA: '06', CO: '08', CT: '09', DE: '10', DC: '11', FL: '12',
+                GA: '13', HI: '15', ID: '16', IL: '17', IN: '18', IA: '19', KS: '20', KY: '21', LA: '22', ME: '23',
+                MD: '24', MA: '25', MI: '26', MN: '27', MS: '28', MO: '29', MT: '30', NE: '31', NV: '32', NH: '33',
+                NJ: '34', NM: '35', NY: '36', NC: '37', ND: '38', OH: '39', OK: '40', OR: '41', PA: '42', RI: '44',
+                SC: '45', SD: '46', TN: '47', TX: '48', UT: '49', VT: '50', VA: '51', WA: '53', WV: '54', WI: '55',
+                WY: '56', PR: '72', GU: '66', VI: '78', AS: '60', MP: '69'
+            };
+
+            const stateFips = stateFipsMap[stateAbbr];
+            const allCounties = topojson.feature(countyTopoCache, countyTopoCache.objects.counties);
+            const stateCounties = stateFips
+                ? { type: 'FeatureCollection', features: allCounties.features.filter(f => f.id.toString().startsWith(stateFips)) }
+                : allCounties;
+
+            function getColor(amount) {
+                const t = Math.pow(amount / maxAmount, 0.5); // sqrt scale for better spread
+                const r = Math.round(219 + (0 - 219) * t);
+                const g = Math.round(234 + (68 - 234) * t);
+                const b = Math.round(254 + (181 - 254) * t);
+                return `rgb(${r},${g},${b})`;
+            }
+
+            function styleFeature(feature) {
+                const name = (feature.properties.name || '').toLowerCase();
+                const amount = countyAmounts[name] || 0;
+                return {
+                    fillColor: amount > 0 ? getColor(amount) : '#f1f3f5',
+                    weight: 0.8,
+                    color: '#dee2e6',
+                    fillOpacity: 0.9
+                };
+            }
+
+            // Initialise or reuse map
+            if (!countyMap) {
+                countyMap = L.map('countyMap', { zoomControl: true, attributionControl: false });
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+                    subdomains: 'abcd', maxZoom: 19
+                }).addTo(countyMap);
+            }
+
+            if (countyLayer) {
+                countyMap.removeLayer(countyLayer);
+            }
+
+            countyLayer = L.geoJSON(stateCounties, {
+                style: styleFeature,
+                onEachFeature(feature, layer) {
+                    const name = (feature.properties.name || '').toLowerCase();
+                    const amount = countyAmounts[name] || 0;
+                    layer.bindTooltip(
+                        `<div style="font-family:'Inter',sans-serif;font-size:12px;">
+                            <strong>${feature.properties.name} County</strong><br/>
+                            ${amount > 0 ? formatCurrency(amount) : 'No data'}
+                        </div>`,
+                        { sticky: true, className: 'county-tooltip' }
+                    );
+                    layer.on({
+                        mouseover(e) { e.target.setStyle({ weight: 2, color: '#0044B5', fillOpacity: 1 }); },
+                        mouseout(e) { countyLayer.resetStyle(e.target); }
+                    });
+                }
+            }).addTo(countyMap);
+
+            countyMap.fitBounds(countyLayer.getBounds(), { padding: [20, 20] });
+
+            // Legend
+            document.getElementById('mapLegendMax').innerText = formatCurrency(maxAmount);
+            document.getElementById('mapLegend').classList.remove('hidden');
+            document.getElementById('mapLoaderBadge').classList.add('hidden');
+        }
+
+        function renderSocioeconomicVisuals(regs, fullTotals) {
+            // Initialize data structure
+            const groups = ['Above ALICE', 'ALICE', 'Poverty'];
+            const data = groups.reduce((acc, g) => {
+                acc[g] = {
+                    total: 0,
+                    approved: 0,
+                    denied: 0,
+                    ihpAmount: 0,
+                    haAmount: 0,
+                    onaAmount: 0,
+                    rentalAmount: 0,
+                    repairAmount: 0,
+                    replacementAmount: 0,
+                    personalPropertyAmount: 0,
+                    rentalCount: 0,
+                    repairCount: 0,
+                    propCount: 0,
+                    otherCount: 0,
+                    ownerAmount: 0,
+                    renterAmount: 0,
+                    ownerCount: 0,
+                    renterCount: 0
+                };
+                return acc;
+            }, {});
+
+            // 1. Calculate sample metrics
+            let sampleTotalApproved = 0;
+            regs.forEach(r => {
+                const g = getALICECategory(r);
+                data[g].total++;
+                if (r.ihpEligible || r.ihpAmount > 0) {
+                    data[g].approved++;
+                } else {
+                    data[g].denied++;
+                }
+                data[g].ihpAmount += (r.ihpAmount || 0);
+                sampleTotalApproved += (r.ihpAmount || 0);
+
+                data[g].haAmount += (r.haAmount || 0);
+                data[g].onaAmount += (r.onaAmount || 0);
+
+                if (r.rentalAssistanceAmount > 0) {
+                    data[g].rentalAmount += r.rentalAssistanceAmount;
+                    data[g].rentalCount++;
+                }
+                if (r.repairAmount > 0) {
+                    data[g].repairAmount += r.repairAmount;
+                    data[g].repairCount++;
+                }
+                if (r.personalPropertyAmount > 0) {
+                    data[g].personalPropertyAmount += r.personalPropertyAmount;
+                    data[g].propCount++;
+                }
+                if (r.onaAmount > 0) {
+                    data[g].otherCount++;
+                }
+
+                data[g].replacementAmount += (r.replacementAmount || 0);
+
+                if (r.ownRent === 'O') {
+                    data[g].ownerAmount += (r.ihpAmount || 0);
+                    data[g].ownerCount++;
+                } else if (r.ownRent === 'R') {
+                    data[g].renterAmount += (r.ihpAmount || 0);
+                    data[g].renterCount++;
+                }
+            });
+
+            // 2. Calculate Scaling Factors
+            const countScale = fullTotals.totalValidRegistrations / (regs.length || 1);
+            const amountScale = fullTotals.ihpAmount / (sampleTotalApproved || 1);
+
+            // 3. Apply scaling
+            groups.forEach(g => {
+                data[g].total = Math.round(data[g].total * countScale);
+                data[g].approved = Math.round(data[g].approved * countScale);
+                data[g].denied = Math.round(data[g].denied * countScale);
+                data[g].rentalCount = Math.round(data[g].rentalCount * countScale);
+                data[g].repairCount = Math.round(data[g].repairCount * countScale);
+                data[g].propCount = Math.round(data[g].propCount * countScale);
+                data[g].otherCount = Math.round(data[g].otherCount * countScale);
+                data[g].ownerCount = Math.round(data[g].ownerCount * countScale);
+                data[g].renterCount = Math.round(data[g].renterCount * countScale);
+
+                data[g].ihpAmount = data[g].ihpAmount * amountScale;
+                data[g].haAmount = data[g].haAmount * amountScale;
+                data[g].onaAmount = data[g].onaAmount * amountScale;
+                data[g].rentalAmount = data[g].rentalAmount * amountScale;
+                data[g].repairAmount = data[g].repairAmount * amountScale;
+                data[g].personalPropertyAmount = data[g].personalPropertyAmount * amountScale;
+                data[g].ownerAmount = data[g].ownerAmount * amountScale;
+                data[g].renterAmount = data[g].renterAmount * amountScale;
+            });
+
+            // 4. Render House Visuals
+            const approvalVisualsEl = document.getElementById('approvalRateVisuals');
+            approvalVisualsEl.innerHTML = groups.map((g, i) => {
+                const rate = data[g].total > 0 ? (data[g].approved / data[g].total) * 100 : 0;
+                const colors = { 'Above ALICE': BRAND_COLORS.blue, 'ALICE': BRAND_COLORS.yellow, 'Poverty': '#ef4444' };
+                return `
+                    <div class="stat-card p-6 rounded-xl flex flex-col items-center text-center">
+                        <div class="relative w-20 h-20 mb-3">
+                            <svg viewBox="0 0 100 100" class="w-20 h-20">
+                                <path d="M50 10 L90 45 V90 H10 V45 Z" fill="#f1f3f5" />
+                                <clipPath id="clip-${i}"><rect x="0" y="${100 - rate}" width="100" height="${rate}" /></clipPath>
+                                <path d="M50 10 L90 45 V90 H10 V45 Z" fill="${colors[g]}" clip-path="url(#clip-${i})" />
+                                <path d="M50 10 L90 45 V90 H10 V45 Z" fill="none" stroke="${colors[g]}" stroke-width="2" />
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center pt-5">
+                                <span class="text-lg font-antonio font-bold text-gray-800">${rate.toFixed(0)}%</span>
+                            </div>
+                        </div>
+                        <h4 class="font-palanquin font-bold text-gray-700 uppercase tracking-widest text-[10px]">${g}</h4>
+                        <p class="text-[9px] text-gray-400 uppercase mt-1">Approval Rate</p>
+                    </div>
+                `;
+            }).join('');
+
+            // 5. Status by Category Chart
+            if (statusByCategoryChart) statusByCategoryChart.destroy();
+            statusByCategoryChart = new Chart(document.getElementById('statusByCategoryChart'), {
+                type: 'bar',
+                data: {
+                    labels: groups,
+                    datasets: [
+                        { label: 'Approved (Est)', data: groups.map(g => data[g].approved), backgroundColor: BRAND_COLORS.blue },
+                        { label: 'Ineligible (Est)', data: groups.map(g => data[g].denied), backgroundColor: BRAND_COLORS.gray }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, grid: { color: '#f1f3f5' } }
+                    }
+                }
+            });
+
+            // 6. Assistance Breakdown Chart
+            if (assistanceBreakdownChart) assistanceBreakdownChart.destroy();
+            assistanceBreakdownChart = new Chart(document.getElementById('assistanceBreakdownChart'), {
+                type: 'bar',
+                data: {
+                    labels: groups,
+                    datasets: [
+                        { label: 'Rental', data: groups.map(g => data[g].rentalCount > 0 ? data[g].rentalAmount / data[g].rentalCount : 0), backgroundColor: BRAND_COLORS.blue },
+                        { label: 'Repair', data: groups.map(g => data[g].repairCount > 0 ? data[g].repairAmount / data[g].repairCount : 0), backgroundColor: BRAND_COLORS.yellow },
+                        { label: 'Other', data: groups.map(g => data[g].otherCount > 0 ? data[g].onaAmount / data[g].otherCount : 0), backgroundColor: BRAND_COLORS.gray }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { color: '#f1f3f5' } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 7. Butterfly Chart
+            if (butterflyChart) butterflyChart.destroy();
+            butterflyChart = new Chart(document.getElementById('butterflyChart'), {
+                type: 'bar',
+                data: {
+                    labels: groups,
+                    datasets: [
+                        { label: 'Owners (Est)', data: groups.map(g => data[g].ownerAmount), backgroundColor: BRAND_COLORS.blue },
+                        { label: 'Renters (Est)', data: groups.map(g => -data[g].renterAmount), backgroundColor: BRAND_COLORS.yellow }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${formatCurrency(Math.abs(c.raw))}` } } },
+                    scales: {
+                        x: { ticks: { callback: (v) => formatCurrency(Math.abs(v)) }, grid: { color: '#f1f3f5' } },
+                        y: { ticks: { font: { weight: 'bold' } }, grid: { display: false } }
+                    }
+                }
+            });
+
+            // 8. Share Donut
+            if (shareDonutChart) shareDonutChart.destroy();
+            shareDonutChart = new Chart(document.getElementById('shareDonutChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: groups,
+                    datasets: [{
+                        data: groups.map(g => data[g].ihpAmount),
+                        backgroundColor: [BRAND_COLORS.blue, BRAND_COLORS.yellow, BRAND_COLORS.gray],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // 9. Summary Table
+            const totalApps = groups.reduce((s, g) => s + data[g].total, 0);
+            const totalIhp = groups.reduce((s, g) => s + data[g].ihpAmount, 0);
+            const totalApproved = groups.reduce((s, g) => s + data[g].approved, 0);
+            const overallRate = totalApps > 0 ? (totalApproved / totalApps * 100).toFixed(1) : 0;
+            const overallAvg = totalApps > 0 ? totalIhp / totalApps : 0;
+
+            document.getElementById('socioTableBody').innerHTML = groups.map(g => {
+                const groupData = data[g];
+                const pctOfApps = totalApps > 0 ? (groupData.total / totalApps * 100).toFixed(1) : 0;
+                const appRate = groupData.total > 0 ? (groupData.approved / groupData.total * 100).toFixed(1) : 0;
+                const avgAsst = groupData.total > 0 ? groupData.ihpAmount / groupData.total : 0;
+                return `<tr><td class="font-bold text-gray-800">${g}</td><td>${groupData.total.toLocaleString()}</td><td class="text-gray-500">${pctOfApps}%</td><td class="text-alice-blue font-bold">${formatCurrency(groupData.ihpAmount)}</td><td><div class="flex items-center gap-2"><div class="w-12 h-1.5 bg-gray-100 rounded-full overflow-hidden"><div class="h-full bg-alice-blue" style="width: ${appRate}%"></div></div><span>${appRate}%</span></div></td><td>${formatCurrency(avgAsst)}</td></tr>`;
+            }).join('') + `
+            <tr class="socio-total-row">
+                <td class="font-bold">All Groups</td>
+                <td class="font-bold">${totalApps.toLocaleString()}</td>
+                <td class="font-bold">100%</td>
+                <td class="font-bold">${formatCurrency(totalIhp)}</td>
+                <td class="font-bold"><div class="flex items-center gap-2"><div class="w-12 h-1.5 bg-white/30 rounded-full overflow-hidden"><div class="h-full bg-white" style="width: ${overallRate}%"></div></div><span>${overallRate}%</span></div></td>
+                <td class="font-bold">${formatCurrency(overallAvg)}</td>
+            </tr>`;
+
+            // 10. Assistance Details Table
+            const totRentalCount = groups.reduce((s, g) => s + data[g].rentalCount, 0);
+            const totRentalAmt = groups.reduce((s, g) => s + data[g].rentalAmount, 0);
+            const totRepairCount = groups.reduce((s, g) => s + data[g].repairCount, 0);
+            const totRepairAmt = groups.reduce((s, g) => s + data[g].repairAmount, 0);
+            const totPropCount = groups.reduce((s, g) => s + data[g].propCount, 0);
+            const totPropAmt = groups.reduce((s, g) => s + data[g].personalPropertyAmount, 0);
+            const totOtherCount = groups.reduce((s, g) => s + data[g].otherCount, 0);
+            const totOnaAmt = groups.reduce((s, g) => s + data[g].onaAmount, 0);
+
+            document.getElementById('asstDetailsTableBody').innerHTML = groups.map(g => {
+                const d = data[g];
+                return `
+                    <tr>
+                        <td class="font-bold text-gray-800">${g}</td>
+                        <td class="text-right">${d.rentalCount.toLocaleString()}</td>
+                        <td class="text-right text-alice-blue font-medium">${formatCurrency(d.rentalCount > 0 ? d.rentalAmount / d.rentalCount : 0)}</td>
+                        <td class="text-right">${d.repairCount.toLocaleString()}</td>
+                        <td class="text-right text-alice-blue font-medium">${formatCurrency(d.repairCount > 0 ? d.repairAmount / d.repairCount : 0)}</td>
+                        <td class="text-right">${d.propCount.toLocaleString()}</td>
+                        <td class="text-right text-alice-blue font-medium">${formatCurrency(d.propCount > 0 ? d.personalPropertyAmount / d.propCount : 0)}</td>
+                        <td class="text-right">${d.otherCount.toLocaleString()}</td>
+                        <td class="text-right text-alice-blue font-medium">${formatCurrency(d.otherCount > 0 ? d.onaAmount / d.otherCount : 0)}</td>
+                    </tr>
+                `;
+            }).join('') + `
+            <tr class="socio-total-row">
+                <td class="font-bold">All Groups</td>
+                <td class="text-right font-bold">${totRentalCount.toLocaleString()}</td>
+                <td class="text-right font-bold">${formatCurrency(totRentalCount > 0 ? totRentalAmt / totRentalCount : 0)}</td>
+                <td class="text-right font-bold">${totRepairCount.toLocaleString()}</td>
+                <td class="text-right font-bold">${formatCurrency(totRepairCount > 0 ? totRepairAmt / totRepairCount : 0)}</td>
+                <td class="text-right font-bold">${totPropCount.toLocaleString()}</td>
+                <td class="text-right font-bold">${formatCurrency(totPropCount > 0 ? totPropAmt / totPropCount : 0)}</td>
+                <td class="text-right font-bold">${totOtherCount.toLocaleString()}</td>
+                <td class="text-right font-bold">${formatCurrency(totOtherCount > 0 ? totOnaAmt / totOtherCount : 0)}</td>
+            </tr>`;
+        }
+
+        // Updated renderCharts to include socioeconomic visuals
+        function renderCharts(regs, fullTotals) {
+            // Aggregate sample metrics for global charts
+            const ownRentMap = regs.reduce((acc, r) => {
+                const key = r.ownRent || 'Unknown';
+                acc[key] = (acc[key] || 0) + 1;
+                return acc;
+            }, {});
+
+            let sampleHaTotal = 0, sampleOnaTotal = 0, sampleTotalApproved = 0;
+            regs.forEach(r => {
+                sampleHaTotal += (r.haAmount || 0);
+                sampleOnaTotal += (r.onaAmount || 0);
+                sampleTotalApproved += (r.ihpAmount || 0);
+            });
+
+            // Calculate Scaling Factors
+            const countScale = fullTotals.totalValidRegistrations / (regs.length || 1);
+            const amountScale = fullTotals.ihpAmount / (sampleTotalApproved || 1);
+
+            // 1. Homeowners vs Renters (Scaled)
+            if (ownRentChart) ownRentChart.destroy();
+            const orCtx = document.getElementById('ownRentChart').getContext('2d');
+            ownRentChart = new Chart(orCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(ownRentMap).map(k => k === 'O' ? 'Owners' : (k === 'R' ? 'Renters' : k)),
+                    datasets: [{
+                        label: 'Applicants (Estimated)',
+                        data: Object.values(ownRentMap).map(v => Math.round(v * countScale)),
+                        backgroundColor: '#38bdf8',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+
+            // 2. Assistance Type Distribution (Scaled)
+            if (assistanceChart) assistanceChart.destroy();
+            const aCtx = document.getElementById('assistanceChart').getContext('2d');
+            assistanceChart = new Chart(aCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Housing Assistance (Est)', 'Other Needs (Est)'],
+                    datasets: [{
+                        data: [sampleHaTotal * amountScale, sampleOnaTotal * amountScale],
+                        backgroundColor: ['#818cf8', '#fb7185'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 20 } } }
+                }
+            });
+
+            // NEW: Socioeconomic Analysis
+            renderSocioeconomicVisuals(regs, fullTotals);
+        }
+
+        // ---------------- Filter Logic ----------------
+
+        function initFilters() {
+            const yearSelect = document.getElementById('yearFilter');
+            const currentYear = new Date().getFullYear();
+            for (let y = currentYear; y >= 2000; y--) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                yearSelect.appendChild(opt);
+            }
+
+            const stateSelect = document.getElementById('stateFilter');
+            const states = ["AL", "AK", "AS", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "GU", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "MP", "OH", "OK", "OR", "PA", "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VI", "VA", "WA", "WV", "WI", "WY"];
+            states.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                stateSelect.appendChild(opt);
+            });
+
+            // Listeners
+            [yearSelect, stateSelect, document.getElementById('countyFilter')].forEach(el => {
+                el.addEventListener('change', () => fetchDisasters());
+            });
+
+            stateSelect.addEventListener('change', (e) => populateCounties(e.target.value));
+        }
+
+        async function populateCounties(state) {
+            const countySelect = document.getElementById('countyFilter');
+            countySelect.innerHTML = '<option value="">All Counties</option>';
+            if (!state) {
+                countySelect.disabled = true;
+                return;
+            }
+
+            countySelect.disabled = false;
+            try {
+                const resp = await fetch(`${API_BASE}/DisasterDeclarationsSummaries?$filter=state eq '${state}' and ihProgramDeclared eq true&$select=designatedArea&$top=500`);
+                const data = await resp.json();
+                const areas = data.DisasterDeclarationsSummaries || [];
+
+                const uniqueCounties = [...new Set(areas.map(a => a.designatedArea))].sort();
+                uniqueCounties.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    if (c) countySelect.appendChild(opt);
+                });
+            } catch (err) {
+                console.error("County load error:", err);
+            }
+        }
+
+        // Search Handlers
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                fetchDisasters();
+            }, 400);
+        });
+
+        // ---------------- Helpers ----------------
+
+        function formatCurrency(val) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+        }
+
+        // Initial Load
+        initFilters();
+        fetchDisasters();
+    </script>
+</body>
+
+</html>
