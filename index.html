@@ -3,250 +3,499 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Drew Abrahamson | Portfolio</title>
-
-  <link
-    rel="stylesheet"
-    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-  />
-
+  <title>Drew Abrahamson | Data Analytics Portfolio</title>
   <style>
+    :root {
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #1d4ed8;
+      --accent-dark: #1e3a8a;
+      --border: #e5e7eb;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      --radius: 16px;
+      --max-width: 1100px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     html {
       scroll-behavior: smooth;
     }
 
     body {
-      font-family: Arial, sans-serif;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       line-height: 1.6;
     }
 
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      width: min(var(--max-width), calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+
+    .nav-links a {
+      margin-left: 1.25rem;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
     .hero {
-      background: linear-gradient(135deg, #1f3c88, #39a0ed);
-      color: white;
-      padding: 100px 0;
+      padding: 5rem 0 4rem;
+      background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 45%, #f8fafc 100%);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 2rem;
+      align-items: center;
     }
 
     .hero h1 {
-      font-size: 3rem;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 1.1;
+      margin: 0 0 1rem;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 700px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.85rem 1.2rem;
+      border-radius: 999px;
       font-weight: 700;
+      transition: 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dark);
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .btn-secondary:hover {
+      text-decoration: none;
+      border-color: #cbd5e1;
+    }
+
+    .hero-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .hero-card h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat:last-child {
+      border-bottom: 0;
+    }
+
+    .stat span:first-child {
+      color: var(--muted);
+    }
+
+    section {
+      padding: 4rem 0;
     }
 
     .section-title {
-      margin-bottom: 30px;
-      font-weight: 700;
+      font-size: 2rem;
+      margin: 0 0 0.75rem;
       text-align: center;
     }
 
-    .project-card {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      height: 100%;
+    .section-subtitle {
+      text-align: center;
+      color: var(--muted);
+      max-width: 700px;
+      margin: 0 auto 2rem;
     }
 
-    .project-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    .about-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 2rem;
+      max-width: 850px;
+      margin: 0 auto;
     }
 
-    .card-body {
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
       display: flex;
       flex-direction: column;
     }
 
-    .card-body .btn {
-      margin-top: auto;
+    .card-top {
+      height: 140px;
+      background: linear-gradient(135deg, #1d4ed8, #60a5fa);
+    }
+
+    .card-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card h3 {
+      margin: 0 0 0.75rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      margin: 0 0 1.25rem;
+      flex: 1;
+    }
+
+    .tag-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .tag {
+      font-size: 0.8rem;
+      background: #eff6ff;
+      color: var(--accent-dark);
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+    }
+
+    .contact-box {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      max-width: 750px;
+      margin: 0 auto;
+      text-align: center;
     }
 
     footer {
-      background: #222;
-      color: white;
-      padding: 20px 0;
+      border-top: 1px solid var(--border);
+      padding: 2rem 0;
+      color: var(--muted);
       text-align: center;
+      background: white;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid,
+      .projects-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hero {
+        padding-top: 3.5rem;
+      }
     }
   </style>
 </head>
 <body>
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-    <div class="container">
-      <a class="navbar-brand" href="#home">Drew Abrahamson</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-          <li class="nav-item"><a class="nav-link" href="#projects">Projects</a></li>
-          <li class="nav-item"><a class="nav-link" href="#fun">Fun</a></li>
-          <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-        </ul>
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a class="brand" href="#">Drew Abrahamson</a>
+      <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+        <a href="https://github.com/aaabrahamson78" target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>
     </div>
   </nav>
 
-  <section id="home" class="hero">
-    <div class="container text-center">
-      <h1>Drew Abrahamson</h1>
-      <p class="lead mt-3">
-        Data Analytics, GIS, Visualization, and Public Data Projects
-      </p>
-      <a href="#projects" class="btn btn-light btn-lg mt-3">View My Projects</a>
-    </div>
-  </section>
+  <header class="hero">
+    <div class="container hero-grid">
+      <div>
+        <h1>Data, GIS, and public insights projects.</h1>
+        <p>
+          I build practical tools and visualizations using public data, spatial analysis,
+          and interactive dashboards to make complex information easier to understand.
+        </p>
+        <div class="hero-buttons">
+          <a class="btn btn-primary" href="#projects">View Projects</a>
+          <a class="btn btn-secondary" href="https://github.com/aaabrahamson78" target="_blank" rel="noopener noreferrer">GitHub Profile</a>
+        </div>
+      </div>
 
-  <section id="about" class="py-5">
+      <div class="hero-card">
+        <h3>Focus Areas</h3>
+        <div class="stat">
+          <span>Data Analytics</span>
+          <strong>ACS, PUMS, admin data</strong>
+        </div>
+        <div class="stat">
+          <span>Spatial Analysis</span>
+          <strong>GIS and mapping</strong>
+        </div>
+        <div class="stat">
+          <span>Visualization</span>
+          <strong>Dashboards and charts</strong>
+        </div>
+        <div class="stat">
+          <span>Applied Projects</span>
+          <strong>Public-interest tools</strong>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="about">
     <div class="container">
       <h2 class="section-title">About</h2>
-      <div class="row justify-content-center">
-        <div class="col-md-8">
-          <p class="text-center">
-            Welcome to my portfolio. This site highlights projects in data analytics,
-            public data visualization, GIS, and interactive tools. I work on projects
-            that turn complex datasets into practical, usable insights.
-          </p>
-        </div>
+      <p class="section-subtitle">
+        A simple portfolio homepage for project links, public demos, and data work.
+      </p>
+
+      <div class="about-box">
+        <p>
+          Welcome to my portfolio. This site highlights work in data analytics,
+          public-use data, GIS, and interactive tools. My projects focus on turning
+          raw datasets into usable information through clean visuals, practical design,
+          and accessible web presentation.
+        </p>
       </div>
     </div>
   </section>
 
-  <section id="projects" class="py-5 bg-light">
+  <section id="projects">
     <div class="container">
       <h2 class="section-title">Projects</h2>
+      <p class="section-subtitle">
+        Replace placeholder text and links as you publish more work.
+      </p>
 
-      <div class="row">
+      <div class="projects-grid">
 
-        <div class="col-md-4 mb-4">
-          <div class="card project-card">
-            <div class="card-body">
-              <h5 class="card-title">ALICE FEMA</h5>
-              <p class="card-text">
-                FEMA assistance insights application and data exploration project.
-              </p>
-              <a
-                href="https://aaabrahamson78.github.io/ALICE_FEMA/"
-                class="btn btn-primary"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Open Project
-              </a>
+        <article class="card">
+          <div class="card-top"></div>
+          <div class="card-body">
+            <h3>ALICE FEMA</h3>
+            <p>
+              FEMA assistance insights application and data exploration project.
+            </p>
+            <div class="tag-row">
+              <span class="tag">FEMA</span>
+              <span class="tag">Dashboard</span>
+              <span class="tag">Public Data</span>
             </div>
+            <a class="btn btn-primary" href="https://aaabrahamson78.github.io/ALICE_FEMA/" target="_blank" rel="noopener noreferrer">
+              Open Project
+            </a>
           </div>
-        </div>
+        </article>
 
-        <div class="col-md-4 mb-4">
-          <div class="card project-card">
-            <div class="card-body">
-              <h5 class="card-title">FEMA Demo</h5>
-              <p class="card-text">
-                Demo page for FEMA-related data or map outputs.
-              </p>
-              <a href="fema/" class="btn btn-primary">
-                Open Project
-              </a>
+        <article class="card">
+          <div class="card-top"></div>
+          <div class="card-body">
+            <h3>ACS Data Tools</h3>
+            <p>
+              Analysis and tools built from American Community Survey and PUMS data.
+            </p>
+            <div class="tag-row">
+              <span class="tag">ACS</span>
+              <span class="tag">PUMS</span>
+              <span class="tag">R</span>
             </div>
+            <a class="btn btn-secondary" href="#">
+              Coming Soon
+            </a>
           </div>
-        </div>
+        </article>
 
-        <div class="col-md-4 mb-4">
-          <div class="card project-card">
-            <div class="card-body">
-              <h5 class="card-title">Charts / Tableau</h5>
-              <p class="card-text">
-                Data visualizations, dashboards, and chart-based storytelling.
-              </p>
-              <a href="charts/" class="btn btn-primary">
-                Open Project
-              </a>
+        <article class="card">
+          <div class="card-top"></div>
+          <div class="card-body">
+            <h3>GIS Mapping</h3>
+            <p>
+              Mapping and spatial analysis projects using administrative and public datasets.
+            </p>
+            <div class="tag-row">
+              <span class="tag">GIS</span>
+              <span class="tag">Maps</span>
+              <span class="tag">Spatial</span>
             </div>
+            <a class="btn btn-secondary" href="#">
+              Coming Soon
+            </a>
           </div>
-        </div>
+        </article>
 
-        <div class="col-md-4 mb-4">
-          <div class="card project-card">
-            <div class="card-body">
-              <h5 class="card-title">ACS / Census Work</h5>
-              <p class="card-text">
-                Analysis and tools built from ACS and public-use microdata.
-              </p>
-              <a href="#" class="btn btn-outline-secondary">
-                Coming Soon
-              </a>
+        <article class="card">
+          <div class="card-top"></div>
+          <div class="card-body">
+            <h3>Tableau / Charts</h3>
+            <p>
+              Visualization work focused on clear communication, dashboards, and chart storytelling.
+            </p>
+            <div class="tag-row">
+              <span class="tag">Tableau</span>
+              <span class="tag">Charts</span>
+              <span class="tag">Viz</span>
             </div>
+            <a class="btn btn-secondary" href="#">
+              Coming Soon
+            </a>
           </div>
-        </div>
+        </article>
 
-        <div class="col-md-4 mb-4">
-          <div class="card project-card">
-            <div class="card-body">
-              <h5 class="card-title">GIS Mapping</h5>
-              <p class="card-text">
-                Mapping and spatial analysis projects using public and administrative data.
-              </p>
-              <a href="#" class="btn btn-outline-secondary">
-                Coming Soon
-              </a>
+        <article class="card">
+          <div class="card-top"></div>
+          <div class="card-body">
+            <h3>Population Synthesis</h3>
+            <p>
+              Synthetic population and demographic modeling work connected to census-based datasets.
+            </p>
+            <div class="tag-row">
+              <span class="tag">Demographics</span>
+              <span class="tag">Modeling</span>
+              <span class="tag">Census</span>
             </div>
+            <a class="btn btn-secondary" href="#">
+              Coming Soon
+            </a>
           </div>
-        </div>
+        </article>
 
-        <div class="col-md-4 mb-4">
-          <div class="card project-card">
-            <div class="card-body">
-              <h5 class="card-title">More Projects</h5>
-              <p class="card-text">
-                Additional tools, experiments, and data products will be added here.
-              </p>
-              <a href="#" class="btn btn-outline-secondary">
-                Coming Soon
-              </a>
+        <article class="card">
+          <div class="card-top"></div>
+          <div class="card-body">
+            <h3>More Projects</h3>
+            <p>
+              A space for future public demos, methods pages, and side projects.
+            </p>
+            <div class="tag-row">
+              <span class="tag">Portfolio</span>
+              <span class="tag">Web</span>
+              <span class="tag">Research</span>
             </div>
+            <a class="btn btn-secondary" href="#">
+              Coming Soon
+            </a>
           </div>
-        </div>
+        </article>
 
       </div>
     </div>
   </section>
 
-  <section id="fun" class="py-5">
-    <div class="container">
-      <h2 class="section-title">Fun</h2>
-      <p class="text-center">
-        A place for side projects, experiments, and visual ideas outside of my main work.
-      </p>
-    </div>
-  </section>
-
-  <section id="contact" class="py-5 bg-light">
+  <section id="contact">
     <div class="container">
       <h2 class="section-title">Contact</h2>
-      <p class="text-center mb-2"><strong>Drew Abrahamson</strong></p>
-      <p class="text-center mb-2">
-        <a href="https://github.com/aaabrahamson78" target="_blank" rel="noopener noreferrer">
-          GitHub Profile
-        </a>
-      </p>
-      <p class="text-center">
-        Add your email or LinkedIn here.
-      </p>
+      <div class="contact-box">
+        <p><strong>Drew Abrahamson</strong></p>
+        <p>
+          GitHub:
+          <a href="https://github.com/aaabrahamson78" target="_blank" rel="noopener noreferrer">
+            github.com/aaabrahamson78
+          </a>
+        </p>
+        <p>Add your email or LinkedIn here.</p>
+      </div>
     </div>
   </section>
 
   <footer>
     <div class="container">
-      <p class="mb-0">© 2026 Drew Abrahamson</p>
+      © 2026 Drew Abrahamson
     </div>
   </footer>
 
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
