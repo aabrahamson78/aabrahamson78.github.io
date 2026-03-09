@@ -1,7 +1,0 @@
-{
-  "name": "FEMA Assistance Insights",
-  "description": "A comprehensive dashboard for analyzing FEMA Individual Assistance data with socioeconomic insights (ALICE).",
-  "requestFramePermissions": [
-    "geolocation"
-  ]
-}
